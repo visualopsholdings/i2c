@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>HierarchyData</key>
+	<array>
+		<string>74203B69-C98A-4F66-ABE8-C2FEE68D4643</string>
+	</array>
+	<key>ProjectItems</key>
+	<dict>
+		<key>74203B69-C98A-4F66-ABE8-C2FEE68D4643</key>
+		<dict>
+			<key>ItemData</key>
+			<dict>
+				<key>BookmarkData</key>
+				<data>
+				Ym9va/gCAAAAAAQQMAAAAFZVHjaWgx3Us/z0C8l97r1P
+				RpKmhW5QeesHfCxjBHCV9AEAAAQAAAADAwAAAAgAKAUA
+				AAABAQAAVXNlcnMAAAAEAAAAAQEAAHBhdWwDAAAAAQEA
+				AERldgAFAAAAAQEAAFZPUFBTAAAABwAAAAEBAAB2b3Bz
+				RGV2AAMAAAABAQAAaTJjABgAAAABBgAAEAAAACAAAAAs
+				AAAAOAAAAEgAAABYAAAACAAAAAQDAADYWgAAAAAAAAgA
+				AAAEAwAAvDIEAAAAAAAIAAAABAMAAEaDFgAAAAAACAAA
+				AAQDAAB1hhYAAAAAAAgAAAAEAwAAeYYWAAAAAAAIAAAA
+				BAMAAKsxNAoAAAAAGAAAAAEGAACEAAAAlAAAAKQAAAC0
+				AAAAxAAAANQAAAAIAAAAAAQAAEHFCcWGwsazGAAAAAEC
+				AAACAAAAAAAAAA8AAAAAAAAAAAAAAAAAAAAIAAAABAMA
+				AAQAAAAAAAAABAAAAAMDAAD1AQAACAAAAAEJAABmaWxl
+				Oi8vLwwAAAABAQAATWFjaW50b3NoIEhECAAAAAQDAAAA
+				kIKW5wAAAAgAAAAABAAAQcTsS70AAAAkAAAAAQEAAEEx
+				NEU5RjM4LUFDQUQtNEVGQi05NENBLTM0NDU3MUZFNUM2
+				ORgAAAABAgAAgQAAAAEAAADvEwAAAQAAAAAAAAAAAAAA
+				AQAAAAEBAAAvAAAAAAAAAAEFAADMAAAA/v///wEAAAAA
+				AAAAEAAAAAQQAABkAAAAAAAAAAUQAADkAAAAAAAAABAQ
+				AAAUAQAAAAAAAEAQAAAEAQAAAAAAAAIgAADgAQAAAAAA
+				AAUgAABQAQAAAAAAABAgAABgAQAAAAAAABEgAACUAQAA
+				AAAAABIgAAB0AQAAAAAAABMgAACEAQAAAAAAACAgAADA
+				AQAAAAAAADAgAADsAQAAAAAAAAHAAAA0AQAAAAAAABHA
+				AAAgAAAAAAAAABLAAABEAQAAAAAAABDQAAAEAAAAAAAA
+				AA==
+				</data>
+				<key>FileURL</key>
+				<string>file:///Users/paul/Dev/VOPPS/vopsDev/i2c/</string>
+				<key>HasSecurityScope</key>
+				<true/>
+				<key>RelativePath</key>
+				<string>./</string>
+				<key>TypeID</key>
+				<string>_CFileLocator</string>
+				<key>Version</key>
+				<integer>1</integer>
+			</dict>
+			<key>ItemName</key>
+			<string>i2c</string>
+			<key>ItemType</key>
+			<string>FolderReference</string>
+			<key>UserOverrideItemName</key>
+			<true/>
+		</dict>
+	</dict>
+	<key>com.barebones.DocumentFormatVersion</key>
+	<integer>5</integer>
+	<key>com.barebones.DocumentType</key>
+	<string>Project</string>
+</dict>
+</plist>
