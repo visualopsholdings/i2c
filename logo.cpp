@@ -113,16 +113,16 @@ void Logo::restart() {
   
 }
 
-short Logo::parseint(const LogoInstruction &entry) {
+short Logo::parseint(short type, short op, short len) {
 
-  switch (entry._optype) {
+  switch (type) {
   
   case OPTYPE_STRING:
-    getstring(_tmpbuf, sizeof(_tmpbuf), entry._op, entry._opand);
+    getstring(_tmpbuf, sizeof(_tmpbuf), op, len);
     return atoi(_tmpbuf);
     
   case OPTYPE_NUM:
-    return entry._op;
+    return op;
     
   default:
     break;
@@ -154,7 +154,7 @@ short Logo::popint() {
     error(LG_STACK_OVERFLOW);
     return 0;
   }
-  short i = parseint(_stack[_tos]);
+  short i = parseint(_stack[_tos]._optype, _stack[_tos]._op, _stack[_tos]._opand);
   if (i >= 0) {
     return i;
   }
@@ -162,7 +162,7 @@ short Logo::popint() {
   if (_stack[_tos]._optype == OPTYPE_REF) {
     short var = getvarfromref(_stack[_tos]);
     if (var >= 0) {
-      i = parseint(_variables[var]._value);
+      i = parseint(_variables[var]._type, _variables[var]._value, _variables[var]._valuelen);
       if (i >= 0) {
         return i;
       }
@@ -188,7 +188,7 @@ void Logo::pushint(short n) {
 
 }
 
-void Logo::pushstring(short n, short len) {
+void Logo::pushstring(tStrPool n, tStrPool len) {
 
   DEBUG_IN(Logo, "pushstring");
   
@@ -234,16 +234,16 @@ void Logo::modifyreturn(short rel, short count) {
 }
 #endif
 
-bool Logo::parsestring(const LogoInstruction &entry, char *s, short len) {
+bool Logo::parsestring(short type, short op, short oplen, char *s, short len) {
 
-  switch (entry._optype) {
+  switch (type) {
   
   case OPTYPE_STRING:
-    getstring(s, len, entry._op, entry._opand);
+    getstring(s, len, op, oplen);
     return true;
     
   case OPTYPE_NUM:
-    snprintf(s, len, "%d", _stack[_tos]._op);
+    snprintf(s, len, "%d", op);
     return true;
     
   default:
@@ -267,7 +267,7 @@ bool Logo::pop() {
   
 }
 
-void Logo::popstring(char *s, short len) {
+void Logo::popstring(char *s, tStrPool len) {
 
   DEBUG_IN(Logo, "popstring");
   
@@ -275,11 +275,11 @@ void Logo::popstring(char *s, short len) {
     error(LG_STACK_OVERFLOW);
     return;
   }
-  if (!parsestring(_stack[_tos], s, len)) {
+  if (!parsestring(_stack[_tos]._optype, _stack[_tos]._op, _stack[_tos]._opand, s, len)) {
 #ifdef HAS_VARIABLES
     short var = getvarfromref(_stack[_tos]);
     if (var >= 0) {
-      if (!parsestring(_variables[var]._value, s, len))
+      if (!parsestring(_variables[var]._type, _variables[var]._value, _variables[var]._valuelen, s, len))
 #endif
         *s = 0;
 #ifdef HAS_VARIABLES
@@ -311,7 +311,7 @@ bool Logo::codeisnum(short rel) {
 #ifdef HAS_VARIABLES
   if (_code[_pc+rel]._optype == OPTYPE_REF) {
     short var = getvarfromref(_code[_pc+rel]);
-    val = _variables[var]._value._optype == OPTYPE_NUM;
+    val = _variables[var]._type == OPTYPE_NUM;
     DEBUG_RETURN(" ref %b", val);
     return val;
   }
@@ -331,11 +331,11 @@ short Logo::codetonum(short rel) {
 #ifdef HAS_VARIABLES
   if (_code[_pc+rel]._optype == OPTYPE_REF) {
     short var = getvarfromref(_code[_pc+rel]);
-    if (_variables[var]._value._optype != OPTYPE_NUM) {
+    if (_variables[var]._type != OPTYPE_NUM) {
       error(LG_NOT_NUM);
       return 0;
     }
-    val = _variables[var]._value._op;
+    val = _variables[var]._value;
     DEBUG_RETURN(" ref %i", val);
     return val;
   }
@@ -358,7 +358,7 @@ bool Logo::codeisstring(short rel) {
 
 }
 
-void Logo::codetostring(short rel, short *s, short *len) {
+void Logo::codetostring(short rel, tStrPool *s, tStrPool *len) {
 
   if (!codeisstring(rel)) {
     error(LG_NOT_STRING);
@@ -475,7 +475,11 @@ short Logo::step() {
   case OPTYPE_REF:
     {
       short var = getvarfromref(_code[_pc]);
-      if (!push(_variables[var]._value)) {
+      LogoInstruction inst;
+      inst._optype = _variables[var]._type;
+      inst._op = _variables[var]._value;
+      inst._opand = _variables[var]._valuelen;
+      if (!push(inst)) {
         err = LG_STACK_OVERFLOW;
       }
     }
@@ -672,7 +676,7 @@ short Logo::doreturn() {
     
 }
 
-void Logo::addop(short *next, short type, short op, short opand) {
+void Logo::addop(tJump *next, short type, short op, short opand) {
 
   DEBUG_IN_ARGS(Logo, "addop", "%i%i%i", type, op, opand);
 
@@ -683,7 +687,7 @@ void Logo::addop(short *next, short type, short op, short opand) {
   
 }
 
-void Logo::compileword(short *next, const char *word, short op) {
+void Logo::compileword(tJump *next, const char *word, short op) {
 
   DEBUG_IN_ARGS(Logo, "compileword", "%s%i", word, op);
   
@@ -804,13 +808,13 @@ bool Logo::isnum(const char *word, short len) {
   
 }
 
-const LogoBuiltinWord *Logo::getbuiltin(const LogoInstruction &entry) const {
+const LogoBuiltinWord *Logo::getbuiltin(short op, short opand) const {
 
-  if (entry._opand == 0) {
-    return &_builtins[entry._op];
+  if (opand == 0) {
+    return &_builtins[op];
   }
-  else if (entry._opand == 1) {
-    return &_core[entry._op];
+  else if (opand == 1) {
+    return &_core[op];
   }
   else {
     return &Logo::core[0];
@@ -818,11 +822,17 @@ const LogoBuiltinWord *Logo::getbuiltin(const LogoInstruction &entry) const {
   
 }
 
-short Logo::addstring(const char *s, short len) {
+const LogoBuiltinWord *Logo::getbuiltin(const LogoInstruction &entry) const {
+
+  return getbuiltin(entry._op, entry._opand);
+  
+}
+
+short Logo::addstring(const char *s, tStrPool len) {
 
   DEBUG_IN_ARGS(Logo, "addstring", "%s%i", s, len);
   
-  if ((_nextstring + len) > STRING_POOL_SIZE) {
+  if ((_nextstring + len) >= STRING_POOL_SIZE) {
     DEBUG_RETURN(" %i", -1);
     return -1;
   }
@@ -831,11 +841,11 @@ short Logo::addstring(const char *s, short len) {
   memmove(_strings + cur, s, len);
   _nextstring += len;
   
-  DEBUG_RETURN(" %i", cur);
+  DEBUG_RETURN(" %i", _nextstring);
   return cur;
 }
 
-void Logo::getstring(char *buf, short buflen, short str, short len) const {
+void Logo::getstring(char *buf, short buflen, tStrPool str, tStrPool len) const {
 
   short l = min(buflen, len);
   memmove(buf, _strings + str, l);
@@ -1085,6 +1095,20 @@ short Logo::geterr() {
   
 }
 
+bool Logo::haserr(short err) {
+
+  DEBUG_IN_ARGS(Logo, "haserr", "%i", err);
+  
+  // walk through the code looking for a particular error.
+  for (short i=0; i<MAX_CODE; i++) {
+    if (_code[i]._optype == OPTYPE_ERR && _code[i]._op == err) {
+      return true;
+    }
+  }
+
+    return false;
+}
+
 void Logo::finishword(short word, short wordlen, short jump) {
 
   DEBUG_IN_ARGS(Logo, "finishword", "%i%i%i", word, wordlen, jump);
@@ -1202,9 +1226,9 @@ void Logo::defineintvar(char *s, short i) {
     _varcount++;
   }
   
-  _variables[var]._value._optype = OPTYPE_NUM;
-  _variables[var]._value._op = i;
-  _variables[var]._value._opand = 0;
+  _variables[var]._type = OPTYPE_NUM;
+  _variables[var]._value = i;
+  _variables[var]._valuelen = 0;
     
 }
 #endif
@@ -1222,11 +1246,11 @@ void Logo::printword(const LogoWord &word) const {
   cout << name;
 }
 
-void Logo::dump(short indent, const LogoInstruction &entry) const {
+void Logo::dump(short indent, short type, short op, short opand) const {
 
   entab(indent);
   char str[128];
-  switch (entry._optype) {
+  switch (type) {
     case OPTYPE_NOOP:
       cout << "noop";
       break;
@@ -1237,50 +1261,57 @@ void Logo::dump(short indent, const LogoInstruction &entry) const {
       cout << "halt";
       break;
     case OPTYPE_BUILTIN:
-      cout << "builtin " << getbuiltin(entry)->_name;
+      cout << "builtin " << getbuiltin(op, opand)->_name;
       break;
     case OPTYPE_WORD:
-      printword(_words[entry._op]);
+      printword(_words[op]);
       break;
     case OPTYPE_STRING:
-      getstring(str, sizeof(str), entry._op, entry._opand);
+      getstring(str, sizeof(str), op, opand);
       cout << "string " << str;
       break;
     case OPTYPE_NUM:
-      cout << "num " << entry._op;
+      cout << "num " << op;
       break;
 #ifdef HAS_VARIABLES
     case OPTYPE_REF:
-      getstring(str, sizeof(str), entry._op, entry._opand);
+      getstring(str, sizeof(str), op, opand);
       cout << "ref " << str;
       break;
 #endif
     case OPTYPE_ERR:
-      cout << "err " << entry._op;
+      cout << "err " << op;
       break;
     case SOPTYPE_ARITY:
-      cout << "(stack) arity pc " << entry._op << " to go " << entry._opand;
+      cout << "(stack) arity pc " << op << " to go " << opand;
       break;
 #ifdef HAS_FOREVER
     case SOPTYPE_MRETADDR:
-      cout << "(stack) mod ret by " << entry._op << " " << entry._opand << " times";
+      cout << "(stack) mod ret by " << op << " " << opand << " times";
       break;
 #endif
     case SOPTYPE_RETADDR:
-      cout << "(stack) ret to " << entry._op;
+      cout << "(stack) ret to " << op;
       break;
     case SOPTYPE_CONDRET:
-      cout << "(stack) cond ret to " << entry._op;
+      cout << "(stack) cond ret to " << op;
       break;
     case SOPTYPE_SKIP:
       cout << "(stack) skip ";
       break;
     default:
-      cout << "unknown optype " << entry._optype;
+      cout << "unknown optype " << type;
   }
+
 }
 
-void Logo::markword(short jump) const {
+void Logo::dump(short indent, const LogoInstruction &entry) const {
+
+  dump(indent, entry._optype, entry._op, entry._opand);
+  
+}
+
+void Logo::markword(tJump jump) const {
 
   for (short i=0; i<_wordcount; i++) {
     char name[WORD_LEN];
@@ -1302,7 +1333,7 @@ void Logo::printvar(const LogoVar &var) const {
   getstring(name, sizeof(name), var._name, var._namelen);
   cout << name;
   
-  dump(2, var._value);
+  dump(2, var._type, var._value, var._valuelen);
   
 }
 #endif
@@ -1368,7 +1399,7 @@ void Logo::mark(short i, short mark, const char *name) const {
 
 void Logo::dumpcode(bool all) const {
 
-  cout << "code: pc (" << _pc << ")" << endl;
+  cout << "code: pc (" << (short)_pc << ")" << endl;
   
   if (!_nextcode) {
     entab(1);
@@ -1495,7 +1526,7 @@ bool LogoWords::pushliterals(Logo &logo, short rel) {
     return true;
   }
   else if (logo.codeisstring(rel)) {
-    short s, l;
+    tStrPool s, l;
     logo.codetostring(rel, &s, &l);
     if (logo.geterr()) {
       return false;

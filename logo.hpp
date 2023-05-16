@@ -76,27 +76,27 @@
 
 //#define LOGO_DEBUG
 
-// if you don't need variables, save about 1.5k bytes
+// if you don't need variables, save about 1.6k bytes
 #define HAS_VARIABLES
 
-// if you don't need repeat or forever, you can save 452 bytes
+// if you don't need repeat or forever, you can save 546 bytes
 #define HAS_FOREVER
 
-// if you don't need IFELSE and all it needs you can save around 1.3k bytes
+// if you don't need IFELSE and all it needs you can save around 1.2k bytes
 #define HAS_IFELSE
 
-// if you don't need [] sentences and all it needs you can save aroun 628 bytes
+// if you don't need [] sentences and all it needs you can save aroun 640 bytes
 #define HAS_SENTENCES
 
-// about 15.2k with all code, 10.2k bare bones with everything off.
+// about 14.5k with all code, 9.6k bare bones with everything off.
 #define STRING_POOL_SIZE  256       // these number of bytes
 #define LINE_LEN          64        // these number of bytes
 #define WORD_LEN          32        // these number of bytes
-#define MAX_WORDS         16        // 6 bytes each
-#define MAX_CODE          100       // 6 bytes each
-#define MAX_STACK         24        // 6 bytes each
+#define MAX_WORDS         32        // 3 bytes each
+#define MAX_CODE          120       // 6 bytes each
+#define MAX_STACK         40        // 6 bytes each
 #ifdef HAS_VARIABLES
-#define MAX_VARS          8        // 10 bytes each
+#define MAX_VARS          12        // 6 bytes each
 #endif
 
 #include <string.h>
@@ -118,65 +118,81 @@
 #define LG_NOT_STRING         13
 #define LG_NOT_BUILTIN        14
 
+#define OPTYPE_NOOP           0 //
+#define OPTYPE_RETURN         1 //
+#define OPTYPE_HALT           2 //
+#define OPTYPE_BUILTIN        3 // _op = index of builtin, _opand = category 0 = builtin, 1 = core 
+#define OPTYPE_ERR            4 // _op = error
+#define OPTYPE_WORD           5 // _op = index of word
+#define OPTYPE_STRING         6 // _op = index of string, _opand = length of string
+#define OPTYPE_NUM            7 // _op = literal number
+#ifdef HAS_VARIABLES
+#define OPTYPE_REF            8 // _op = index of string with a var in it, _opand = length of string
+#endif
+
+// only on the stack
+#define SOP_START             100
+#define SOPTYPE_ARITY         SOP_START + 1 // _op = the arity of the builtin function
+#define SOPTYPE_RETADDR       SOP_START + 2 // _op = the return address. These are just on the stack
+#ifdef HAS_FOREVER
+#define SOPTYPE_MRETADDR      SOP_START + 3 // _op = the offset to modify by
+#endif
+#ifdef HAS_IFELSE
+#define SOPTYPE_CONDRET       SOP_START + 4 // _op = the return address of if true, otherwise _op + 1
+#define SOPTYPE_SKIP          SOP_START + 5 // skip the next instruction if on the stack under a return
+#endif
+
 class Logo;
 
-typedef void (*LogoFp)(Logo &logo);
+typedef void (*tLogoFp)(Logo &logo);
+
+// allow indexes to strings to be chars if the stringpool is small.
+#if STRING_POOL_SIZE <= 256
+typedef unsigned char tStrPool;
+#else
+typedef short tStrPool;
+#endif
+
+// types are predefinced and small.
+typedef unsigned char tType;
+
+// allow the code jump to be a char if the code is small.
+#if MAX_CODE <= 256
+typedef unsigned char tJump;
+#else
+typedef short tJump;
+#endif
 
 typedef struct {
-  const char *_name;
-  LogoFp      _code;
-  short         _arity;
+  const char    *_name;
+  tLogoFp       _code;
+  unsigned char _arity; // smaller than 256?
 } LogoBuiltinWord;
 
 typedef struct {
-  short _name;
-  short _namelen;
-  short _jump;
+  tStrPool  _name;
+  tStrPool  _namelen;
+  tJump     _jump;
 } LogoWord;
 
 typedef struct {
-  short _optype;
-  short _op;
-  short _opand;
+  tType     _optype;
+    // spare char here.
+  short     _opand; // could be holding a repeat count
+  short     _op;    // needs to hold a (possible) literal number
 } LogoInstruction;
 
 #ifdef HAS_VARIABLES
 
-#define TYPE_NUM      0
-#define TYPE_STRING   1
-
 typedef struct {
-  short             _name;
-  short             _namelen;
-  LogoInstruction _value;
+  tType              _type; // just OPTYPE_STRING or OPTYPE_NUM
+  tStrPool           _name;
+  tStrPool           _namelen;
+  tStrPool           _valuelen;
+  short              _value; // needs to hold a (possible) literal number
 } LogoVar;
 
-#endif
-
-#define OPTYPE_NOOP       0 //
-#define OPTYPE_RETURN     1 //
-#define OPTYPE_HALT       2 //
-#define OPTYPE_BUILTIN    3 // _op = index of builtin, _opand = category 0 = builtin, 1 = core 
-#define OPTYPE_ERR        4 // _op = error
-#define OPTYPE_WORD       5 // _op = index of word
-#define OPTYPE_STRING     6 // _op = index of string, _opand = length of string
-#define OPTYPE_NUM        7 // _op = literal number
-#ifdef HAS_VARIABLES
-#define OPTYPE_REF        8 // _op = index of string with a var in it, _opand = length of string
-#endif
-
-// only on the stack
-#define SOP_START         100
-#define SOPTYPE_ARITY     SOP_START + 1 // _op = the arity of the builtin function
-#define SOPTYPE_RETADDR   SOP_START + 2 // _op = the return address. These are just on the stack
-#ifdef HAS_FOREVER
-#define SOPTYPE_MRETADDR  SOP_START + 3 // _op = the offset to modify by
-#endif
-#ifdef HAS_IFELSE
-#define SOPTYPE_CONDRET   SOP_START + 4 // _op = the return address of if true, otherwise _op + 1
-#define SOPTYPE_SKIP      SOP_START + 5 // skip the next instruction if on the stack under a return
-#endif
-class Logo;
+#endif // HAS_VARIABLES
 
 class LogoWords {
 
@@ -227,7 +243,8 @@ public:
   
   // find any errors in the code.
   short geterr();
-   
+  bool haserr(short err);
+  
   // main execution
   short step();
   short run();
@@ -239,8 +256,8 @@ public:
   bool stackempty();
   short popint();
   void pushint(short n);
-  void popstring(char *s, short len);  
-  void pushstring(short n, short len);  
+  void popstring(char *s, tStrPool len);  
+  void pushstring(tStrPool n, tStrPool len);  
   bool pop();
 #ifdef HAS_VARIABLES
   void defineintvar(char *s, short i);
@@ -255,7 +272,7 @@ public:
   bool codeisnum(short rel);
   bool codeisstring(short rel);
   short codetonum(short rel);
-  void codetostring(short rel, short *s, short *len);
+  void codetostring(short rel, tStrPool *s, tStrPool *len);
   void jumpskip(short rel);
   void jump(short rel);
   void condreturn(short rel);
@@ -284,7 +301,7 @@ private:
   
   // the pool of all strings
   char _strings[STRING_POOL_SIZE];
-  short _nextstring;
+  tStrPool _nextstring;
   
   // the builtin words.
   LogoBuiltinWord *_builtins;
@@ -309,10 +326,10 @@ private:
    
   // the code
   LogoInstruction _code[MAX_CODE];
-  short _pc;
-  short _nextcode;
-  short _nextjcode; // for allocating new jumps
-  short _startjcode; // where we started making the jumps.
+  tJump _pc;
+  tJump _nextcode;
+  tJump _nextjcode; // for allocating new jumps
+  tJump _startjcode; // where we started making the jumps.
   
   // the stack
   LogoInstruction _stack[MAX_STACK];
@@ -343,32 +360,34 @@ private:
   void parseword(LogoInstruction *entry, const char *word, short len);
   bool istoken(char c, bool newline);
   bool isnum(const char *word, short len);
-  bool parsestring(const LogoInstruction &entry, char *s, short len);
-  void addop(short *next, short type, short op=0, short opand=0);
+  bool parsestring(short type, short op, short oplen, char *s, short len);
+  void addop(tJump *next, short type, short op=0, short opand=0);
 
   // words
-  void compileword(short *next, const char *word, short op);
+  void compileword(tJump *next, const char *word, short op);
   void finishword(short word, short wordlen, short jump);
   short findword(const char *word) const;
   
   // strings
-  short addstring(const char *s, short len);
-  void getstring(char *buf, short buflen, short str, short len) const;
+  short addstring(const char *s, tStrPool len);
+  void getstring(char *buf, short buflen, tStrPool str, tStrPool len) const;
 
   // builtins
+  const LogoBuiltinWord *getbuiltin(short op, short opand) const;
   const LogoBuiltinWord *getbuiltin(const LogoInstruction &entry) const;
   
   // the machine
   bool push(const LogoInstruction &entry);
-  short parseint(const LogoInstruction &entry);
+  short parseint(short type, short op, short len);
   short doreturn();
   short dobuiltin();
   short doarity();
   bool call(const LogoWord &word);
   
 #ifdef LOGO_DEBUG
-  void markword(short jump) const;
-  void dump(short ident, const LogoInstruction &entry) const;
+  void markword(tJump jump) const;
+  void dump(short indent, const LogoInstruction &entry) const;
+  void dump(short indent, short type, short op, short oplen) const;
   void printword(const LogoWord &word) const;
   void entab(short indent) const;
   void mark(short i, short mark, const char *name) const;

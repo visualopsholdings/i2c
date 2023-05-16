@@ -554,8 +554,8 @@ BOOST_AUTO_TEST_CASE( sizes )
   
   // half this size on an arduino
   BOOST_CHECK_EQUAL(sizeof(LogoBuiltinWord), 24);
-  BOOST_CHECK_EQUAL(sizeof(LogoWord), 6);
+  BOOST_CHECK_EQUAL(sizeof(LogoWord), 3);
   BOOST_CHECK_EQUAL(sizeof(LogoInstruction), 6);
-  BOOST_CHECK_EQUAL(sizeof(LogoVar), 10);
+  BOOST_CHECK_EQUAL(sizeof(LogoVar), 6);
   
 }

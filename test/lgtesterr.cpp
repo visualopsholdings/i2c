@@ -62,11 +62,9 @@ BOOST_AUTO_TEST_CASE( tooManyWords )
     str << "TO WORD" << i << "; ON; END;";
     logo.compile(str.str());
   }
-  DEBUG_DUMP(false);
-  BOOST_CHECK_EQUAL(logo.geterr(), LG_TOO_MANY_WORDS);
+  DEBUG_DUMP();
+  BOOST_CHECK(logo.haserr(LG_TOO_MANY_WORDS));
 }
-
-#ifndef SUPER_TINY
 
 BOOST_AUTO_TEST_CASE( outOfStrings )
 {
@@ -87,11 +85,10 @@ BOOST_AUTO_TEST_CASE( outOfStrings )
 
   logo.compile(str.str());
   DEBUG_DUMP(false);
+  
   BOOST_CHECK_EQUAL(logo.geterr(), LG_OUT_OF_STRINGS);
   
 }
-
-#endif // !SUPER_TINY
 
 BOOST_AUTO_TEST_CASE( lineTooLong )
 {
@@ -248,7 +245,7 @@ BOOST_AUTO_TEST_CASE( notNumForLIteralCondReturn )
 void wantsstring(Logo &logo) {
   
   DEBUG_DUMP(false);
-  short s, l;
+  tStrPool s, l;
   logo.codetostring(1, &s, &l);
 
 }

@@ -18,9 +18,9 @@
 //#define SIMPLE_FLASH        // flash an LED on and off the normal way. 3.9K
 //#define SERIAL_FLASH        // Use serial command ON and OFF to turn the LED on and off. 4.6k       
 //#define I2C_FLASH           // Use I2C command ON; and OFF; to turn the LED on and off. 5.8k
-//#define SERIAL_LOGO         // Use Serial commands to run LOGO code. GO; makes it start. 14.1k
-//#define I2C_SERIAL_LOGO     // Use Serial commands and I2c to run LOGO code. GO; makes it start. 15.5k
-#define I2C_LOGO              // Use I2c to run LOGO code. 15k
+//#define SERIAL_LOGO         // Use Serial commands to run LOGO code. GO; makes it start. 13.8k
+//#define I2C_SERIAL_LOGO     // Use Serial commands and I2c to run LOGO code. GO; makes it start. 15.2k
+#define I2C_LOGO              // Use I2c to run LOGO code. 14.8k
 
 #if defined(SERIAL_LOGO) || defined(I2C_SERIAL_LOGO) || defined(I2C_LOGO)
 #define HAS_LOGO
