@@ -252,7 +252,7 @@ You can work out those codes in here:
 
 https://www.rapidtables.com/convert/number/ascii-to-hex.html
 
-## Tiny Logo
+## Tiny LOGO
 
 Ok. So you've written all this code, you can send various commands to your Arduino to
 do interesting things, but how nice would it be to be able to SEND AND RUN ACTUAL CODE
@@ -367,6 +367,6 @@ This stuff is just for the development environment.
 
 The use of "delay()" on the Arduino is a very bad idea, especially like above. The use
 of the LOGO interpreter gives us the perfect opportunity to provide a similar function that 
-simply does schedules the next WORD to arrive after a certain time. Unlike UCB logo it will
+simply does schedules the next WORD to arrive after a certain time. Unlike UCB LOGO it will
 be in milliseconds rather than 60's of a second.
 
