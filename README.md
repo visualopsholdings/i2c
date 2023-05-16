@@ -244,13 +244,13 @@ cluster so easy to make a simple little 4 pin jumper for that end.
 
 Looking down at the PI header it's this:
 
-|        |        |        |        |
--------------------------------------
+| <!-- --> | <!-- --> | <!-- -->  | <!-- --> |
+| ------ | ------ | ------ | ------ |
 | ______ | SCL    | SDA    | ______ | 
 | ------ | ------ | ------ | ------ |
 | ______ | GROUND | VIN    | ______ |
--------------------------------------
-|        |        |        |        |
+| ------ | ------ | ------ | ------ |
+| <!-- --> | <!-- --> | <!-- -->  | <!-- --> |
 
 And on an Arduino, all the pins are usually labelled so that's easy, but there are 2 sets
 of pins usually. The SDA and SCL are right at the end of the long header and the power 
