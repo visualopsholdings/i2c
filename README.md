@@ -248,7 +248,6 @@ Looking down at the PI header it's this:
 | ------ | ------ | ------ | ------ |
 |        | SCL    | SDA    |        |
 |        | GROUND | VIN    |        |
-| ------ | ------ | ------ | ------ |
 | <!-- --> | <!-- --> | <!-- -->  | <!-- --> |
 
 And on an Arduino, all the pins are usually labelled so that's easy, but there are 2 sets
