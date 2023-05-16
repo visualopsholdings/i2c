@@ -347,4 +347,12 @@ That you can comment out BUT while it's commented out the code won't build on th
 
 This stuff is just for the development environment.
   
-  
+## Current development focus
+
+### A LOGO "WAIT"
+
+The use of "delay()" on the Arduino is a very bad idea, especially like above. The use
+of the LOGO interpreter gives us the perfect opportunity to provide a similar function that 
+simply does schedules the next WORD to arrive after a certain time. Unlike UCB logo it will
+be in milliseconds rather than 60's of a second.
+
