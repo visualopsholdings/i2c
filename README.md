@@ -187,10 +187,6 @@ void loop() {
 }
 ```
   
-Ok. So you've written all this code, you can send various commands to your Arduino to
-do interesting things, but how nice would it be to be able to SEND AND RUN ACTUAL CODE
-to the Arduino AFTER you've left it on the Moon!
-
 ## Sending I2C from a PI
 
 To actually send i2c commands to your Arduino, you can use a raspberry PI and then wire
@@ -255,6 +251,10 @@ You can work out those codes in here:
 https://www.rapidtables.com/convert/number/ascii-to-hex.html
 
 ## Tiny Logo
+
+Ok. So you've written all this code, you can send various commands to your Arduino to
+do interesting things, but how nice would it be to be able to SEND AND RUN ACTUAL CODE
+to the Arduino AFTER you've left it on the Moon!
 
 That's where the whole "TinyLogo" project that is a part of this is for. It's only in
 early days with very simple syntax and capabilities, but just for a teaser take
