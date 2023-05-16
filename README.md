@@ -302,6 +302,8 @@ Open "i2c.ino" and you can flash that example right onto your Arduino and try it
 There are about 5 different examples in there of various other things to get you started using
 the various ways you might use this stuff.
 
+You can read more about logo here https://en.wikipedia.org/wiki/Logo_(programming_language)
+
 ## Development
 
 The development process for all of this code used a normal Linux environment with the BOOST
