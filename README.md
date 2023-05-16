@@ -3,6 +3,8 @@
 
 ## Context
 
+### The Problem
+
 I2C is an excellent and simple protocol with builtin tools to use from most
 SBC's running Linux and other Arduinos.
 
@@ -21,6 +23,8 @@ would there be :-)
 
 This code solves this problem by introducing a mechanism for quickly saving what comes in
 within the event handler and then using that usefully in the main loop of the program.
+
+### Naive attempt at a non solution
 
 Here is very simple code to receive a single word of data from I2C and try to do something
 useful with it.
@@ -52,6 +56,8 @@ void loop() {
 
 This will not work :-) The reason is that while your delaying that second you are dropping 
 data from the I2C port :-(
+
+### Naive solution
 
 Here is how you might rewrite it.
 
@@ -92,6 +98,8 @@ For one thing, where do you put the data :-) You can't just write it into a glob
 buffer and then read it out because the writer might simply overwrite it as it goes.
 
 The solution for this is a data structure call a Ring Buffer.
+
+### Ring buffer
 
 A Ring Buffer can be written to AND read from at the same time without the reader and
 writer sharing any thing between them apart from the actual buffer.
@@ -139,6 +147,8 @@ NOW go and look at that thing.
 
 This is what the Cmd class is for!
 
+### The command (Cmd) getter
+
 Cmd consumed the data in the buffer and waits till it finds a ;, tab, newline or space
 and THEN you can get the data out and use it.
 
@@ -180,52 +190,6 @@ void loop() {
 Ok. So you've written all this code, you can send various commands to your Arduino to
 do interesting things, but how nice would it be to be able to SEND AND RUN ACTUAL CODE
 to the Arduino AFTER you've left it on the Moon!
-
-## Tiny Logo
-
-That's where the whole "TinyLogo" project that is a part of this is for. It's only in
-early days with very simple syntax and capabilities, but just for a teaser take
-a look at the source for i2c.ino and search down to "#idef I2C_LOGO" and you
-can see some cool code that takes this LOGO program:
-
-```
-TO FLASH
-  ON WAIT 100 OFF WAIT 1000
-END
-TO TESTFLASH
-  IFELSE :RUNNING FLASH []
-END
-TO RUN
-  FOREVER TESTFLASH
-END
-TO GO
-  MAKE \"RUNNING 1
-END
-TO STOP
-  MAKE \"RUNNING 0
-END
-RUN
-```
-
-And then when you get an I2C string that says "GO;" it will flash the LEDs on and off.
-
-You can send it any of that code ON THE FLY, so even word definitions.
-
-So You could send it:
-
-```
-TO FLASH; ON WAIT 20 OFF WAIT 200; END;
-```
-
-To make it flash faster, or even completely write a new thing like a morse code
-tapper etc without reflashing your Arduino :-)
-
-And that code above fits happily on a Leonardo with 32k of memory (it about fills it though).
-
-Open "i2c.ino" and you can flash that example right onto your Arduino and try it out.
-
-There are about 5 different examples in there of various other things to get you started using
-the various ways you might use this stuff.
 
 ## Sending I2C from a PI
 
@@ -289,6 +253,52 @@ $ i2ctransfer -y 1 w3@0x08 0x47 0x4F 0x3B
 You can work out those codes in here:
 
 https://www.rapidtables.com/convert/number/ascii-to-hex.html
+
+## Tiny Logo
+
+That's where the whole "TinyLogo" project that is a part of this is for. It's only in
+early days with very simple syntax and capabilities, but just for a teaser take
+a look at the source for i2c.ino and search down to "#idef I2C_LOGO" and you
+can see some cool code that takes this LOGO program:
+
+```
+TO FLASH
+  ON WAIT 100 OFF WAIT 1000
+END
+TO TESTFLASH
+  IFELSE :RUNNING FLASH []
+END
+TO RUN
+  FOREVER TESTFLASH
+END
+TO GO
+  MAKE \"RUNNING 1
+END
+TO STOP
+  MAKE \"RUNNING 0
+END
+RUN
+```
+
+And then when you get an I2C string that says "GO;" it will flash the LEDs on and off.
+
+You can send it any of that code ON THE FLY, so even word definitions.
+
+So You could send it:
+
+```
+TO FLASH; ON WAIT 20 OFF WAIT 200; END;
+```
+
+To make it flash faster, or even completely write a new thing like a morse code
+tapper etc without reflashing your Arduino :-)
+
+And that code above fits happily on a Leonardo with 32k of memory (it about fills it though).
+
+Open "i2c.ino" and you can flash that example right onto your Arduino and try it out.
+
+There are about 5 different examples in there of various other things to get you started using
+the various ways you might use this stuff.
 
 ## Development
 
