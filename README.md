@@ -363,6 +363,10 @@ That you can comment out BUT while it's commented out the code won't build on th
 
 This stuff is just for the development environment.
   
+## Related discussions
+
+https://forum.arduino.cc/t/how-to-properly-use-wire-onreceive/891195/12
+
 ## Current development focus
 
 ### A LOGO "WAIT"
