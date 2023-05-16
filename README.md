@@ -220,7 +220,9 @@ into the PI and yoru good to go.
 
 On the PI, you can do this:
 
+```
 $ sudo apt-get install -y i2c-tools
+```
 
 And then you can see your Arduino with:
 
@@ -317,7 +319,9 @@ we use all of these things and just don't build that bit for the Arduino.
 
 So on your Linux (or mac using Homebrew etc), get all you need:
 
+```
 $ sudo apt-get -y install g++ gcc make cmake boost
+```
 
 And then inside the "test" folder on your machine, run:
 
