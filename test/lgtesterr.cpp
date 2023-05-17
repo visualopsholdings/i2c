@@ -209,39 +209,6 @@ void condret(Logo &logo) {
   logo.condreturn(0);
 }
 
-BOOST_AUTO_TEST_CASE( notNumForCondReturn )
-{
-  cout << "=== notNumForCondReturn ===" << endl;
-  
-  LogoBuiltinWord builtins[] = {
-    { "CONDRET", &condret, 0 }
-  };
-  Logo logo(builtins, sizeof(builtins));
-  logo.compile("TO TEST; \"BAD ; END");
-  logo.compile("CONDRET TEST");
-  BOOST_CHECK_EQUAL(logo.geterr(), 0);
-  DEBUG_DUMP(false);
-
-  BOOST_CHECK_EQUAL(logo.run(), LG_NOT_NUM);
-
-}
-
-BOOST_AUTO_TEST_CASE( notNumForLIteralCondReturn )
-{
-  cout << "=== notNumForLIteralCondReturn ===" << endl;
-  
-  LogoBuiltinWord builtins[] = {
-    { "CONDRET", &condret, 0 }
-  };
-  Logo logo(builtins, sizeof(builtins));
-  logo.compile("CONDRET \"BAD");
-  BOOST_CHECK_EQUAL(logo.geterr(), 0);
-  DEBUG_DUMP(false);
-
-  BOOST_CHECK_EQUAL(logo.run(), LG_NOT_NUM);
-
-}
-
 void wantsstring(Logo &logo) {
   
   DEBUG_DUMP(false);

@@ -252,6 +252,47 @@ You can work out those codes in here:
 
 https://www.rapidtables.com/convert/number/ascii-to-hex.html
 
+## Long delay() considered harmful
+
+For simplicity I just used delays between led flashes (sort of to prove my point), but
+this is considered bad practice on an arduino since long delays can stop anything else
+happening.
+
+Here is the correct code you would use to flash an LED with varying delays between on and 
+off.
+
+```
+void setup() {
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, LOW);
+}
+
+int state = 0;
+int lasttime = 0;
+
+void loop() {
+  if (!lasttime) {
+    lasttime = millis();
+    return;
+  }
+  int now = millis();
+  int diff = now - lasttime;
+  if (state == 0 && diff > 1000) {
+    ledOn();
+    state = 1;
+  }
+  else if (state == 1 && diff > 100) {
+    ledOff();
+    state = 0;
+  }
+  else {
+    return;
+  }
+  lasttime = millis();
+}
+
+```
+
 ## Tiny LOGO
 
 Ok. So you've written all this code, you can send various commands to your Arduino to

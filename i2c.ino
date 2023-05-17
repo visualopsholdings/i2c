@@ -19,8 +19,9 @@
 //#define SERIAL_FLASH        // Use serial command "ON" and "OFF" to turn the LED on and off. 4.6k       
 //#define I2C_FLASH           // Use I2C command "ON;" and "OFF;" to turn the LED on and off. 5.8k
 //#define SERIAL_LOGO         // Use Serial commands to run LOGO code. 13.8k
-#define I2C_SERIAL_LOGO     // Use Serial commands and I2c to run LOGO code. 15.2k
+//#define I2C_SERIAL_LOGO     // Use Serial commands and I2c to run LOGO code. 15.2k
 //#define I2C_LOGO             // Use I2c to run LOGO code. 14.8k
+#define CORRECT_FLASH         // An example of how you should properly flash an LED
 
 // For the LOGO examples, "GO;" makes it start. "STOP;" makes it stop 
 // When sedning through serialm, you don't need the semicolon.
@@ -81,6 +82,7 @@ Logo logo(builtins, sizeof(builtins), Logo::core);
 #endif
 
 void flashErr(int mode, int n) {
+  // it's ok to tie up the device with delays here.
   for (int i=0; i<mode; i++) {
     digitalWrite(LED_PIN, HIGH);
     delay(100);
@@ -104,18 +106,17 @@ void setup() {
   // Setup the LED
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, LOW);
-
 }
 
 // Go around and around
 void loop() {
-  
+
   // flash it
   ledOn();
   delay(100);
   ledOff();
   delay(1000);
-
+  
 }
 
 #endif // SIMPLE_FLASH
@@ -448,3 +449,40 @@ void loop() {
 }
 
 #endif // I2C_LOGO
+
+#ifdef CORRECT_FLASH
+
+// At the start
+void setup() {
+
+  // Setup the LED
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, LOW);
+}
+
+int state = 0;
+int lasttime = 0;
+
+// Go around and around
+void loop() {
+  if (!lasttime) {
+    lasttime = millis();
+    return;
+  }
+  int now = millis();
+  int diff = now - lasttime;
+  if (state == 0 && diff > 1000) {
+    ledOn();
+    state = 1;
+  }
+  else if (state == 1 && diff > 100) {
+    ledOff();
+    state = 0;
+  }
+  else {
+    return;
+  }
+  lasttime = millis();
+}
+
+#endif // CORRECT_FLASH
