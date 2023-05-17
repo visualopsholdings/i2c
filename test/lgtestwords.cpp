@@ -404,6 +404,27 @@ BOOST_AUTO_TEST_CASE( ifelseVarRef )
   BOOST_CHECK(logo.stackempty());
 
 }
+
+BOOST_AUTO_TEST_CASE( ifelseMissingVar )
+{
+  cout << "=== ifelseMissingVar ===" << endl;
+  
+  LogoBuiltinWord empty[] = {};
+  Logo logo(empty, 0, Logo::core);
+
+  logo.compile("IFELSE :VAR \"A \"B");
+  BOOST_CHECK_EQUAL(logo.geterr(), 0);
+  DEBUG_DUMP(false);
+
+  DEBUG_STEP_DUMP(10, false);
+  BOOST_CHECK_EQUAL(logo.run(), 0);
+  char str[32];
+  logo.popstring(str, sizeof(str));  
+  BOOST_CHECK_EQUAL(str, "B");
+  BOOST_CHECK(logo.stackempty());
+
+}
+
 #endif // HAS_VARIABLES
 
 #endif // HAS_IFELSE

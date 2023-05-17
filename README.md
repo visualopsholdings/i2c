@@ -267,19 +267,11 @@ can see some cool code that takes this LOGO program:
 TO FLASH
   ON WAIT 100 OFF WAIT 1000
 END
-TO TESTFLASH
-  IFELSE :RUNNING FLASH []
-END
-TO RUN
-  FOREVER TESTFLASH
-END
 TO GO
-  MAKE \"RUNNING 1
+  FOREVER FLASH
 END
 TO STOP
-  MAKE \"RUNNING 0
 END
-RUN
 ```
 
 And then when you get an I2C string that says "GO;" it will flash the LEDs on and off.

@@ -51,7 +51,7 @@ void wait(Logo &logo) {
 #endif
 }
 
-#if !defined(SUPER_TINY) && defined(HAS_VARIABLES) && defined(HAS_FOREVER) && defined(HAS_IFELSE)
+#if defined(HAS_FOREVER)
 
 BOOST_AUTO_TEST_CASE( bigSketch )
 {
@@ -65,26 +65,47 @@ BOOST_AUTO_TEST_CASE( bigSketch )
   Logo logo(builtins, sizeof(builtins), Logo::core);
 
   logo.compile("TO FLASH; ON WAIT 100 OFF WAIT 1000; END;");
-  logo.compile("TO TESTFLASH; IFELSE :RUNNING FLASH []; END;");
-  logo.compile("TO RUN; FOREVER TESTFLASH; END;");
-  logo.compile("TO GO; MAKE \"RUNNING 1; END;");
-  logo.compile("TO STOP; MAKE \"RUNNING 0; END;");
-  logo.compile("RUN GO");
+  logo.compile("TO GO; FOREVER FLASH; END;");
+  logo.compile("TO STOP; END;");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
   DEBUG_DUMP(false);
   
   gCmds.clear();
-//  DEBUG_STEP_DUMP(100, false);
+//   DEBUG_STEP_DUMP(100, false);
+  for (int i=0; i<10; i++) {
+    BOOST_CHECK_EQUAL(logo.step(), 0);
+  }
+  BOOST_CHECK_EQUAL(gCmds.size(), 0);
+
+  logo.resetcode();
+  logo.compile("GO");
+  BOOST_CHECK_EQUAL(logo.geterr(), 0);
+  DEBUG_DUMP(false);
+  BOOST_CHECK_EQUAL(logo.geterr(), 0);
+
+  gCmds.clear();
+//  DEBUG_STEP_DUMP(20, false);
   for (int i=0; i<100; i++) {
     BOOST_CHECK_EQUAL(logo.step(), 0);
   }
-  BOOST_CHECK_EQUAL(gCmds.size(), 27);
+  BOOST_CHECK_EQUAL(gCmds.size(), 49);
   BOOST_CHECK_EQUAL(gCmds[0], "LED ON");
   BOOST_CHECK_EQUAL(gCmds[1], "WAIT 100");
   BOOST_CHECK_EQUAL(gCmds[2], "LED OFF");
   BOOST_CHECK_EQUAL(gCmds[3], "WAIT 1000");
   BOOST_CHECK_EQUAL(gCmds[4], "LED ON");
     
+  logo.resetcode();
+  logo.compile("STOP");
+  BOOST_CHECK_EQUAL(logo.geterr(), 0);
+  DEBUG_DUMP(false);
+  gCmds.clear();
+//  DEBUG_STEP_DUMP(100, false);
+  for (int i=0; i<10; i++) {
+    BOOST_CHECK_EQUAL(logo.step(), 0);
+  }
+  BOOST_CHECK_EQUAL(gCmds.size(), 0);
+  
 }
 
 #else

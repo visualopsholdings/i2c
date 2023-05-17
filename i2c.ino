@@ -16,11 +16,14 @@
 // Uncomment one of these for the example you want to use
 //
 //#define SIMPLE_FLASH        // flash an LED on and off the normal way. 3.9K
-//#define SERIAL_FLASH        // Use serial command ON and OFF to turn the LED on and off. 4.6k       
-//#define I2C_FLASH           // Use I2C command ON; and OFF; to turn the LED on and off. 5.8k
-//#define SERIAL_LOGO         // Use Serial commands to run LOGO code. GO; makes it start. 13.8k
-//#define I2C_SERIAL_LOGO     // Use Serial commands and I2c to run LOGO code. GO; makes it start. 15.2k
-#define I2C_LOGO              // Use I2c to run LOGO code. 14.8k
+//#define SERIAL_FLASH        // Use serial command "ON" and "OFF" to turn the LED on and off. 4.6k       
+//#define I2C_FLASH           // Use I2C command "ON;" and "OFF;" to turn the LED on and off. 5.8k
+//#define SERIAL_LOGO         // Use Serial commands to run LOGO code. 13.8k
+#define I2C_SERIAL_LOGO     // Use Serial commands and I2c to run LOGO code. 15.2k
+//#define I2C_LOGO             // Use I2c to run LOGO code. 14.8k
+
+// For the LOGO examples, "GO;" makes it start. "STOP;" makes it stop 
+// When sedning through serialm, you don't need the semicolon.
 
 #if defined(SERIAL_LOGO) || defined(I2C_SERIAL_LOGO) || defined(I2C_LOGO)
 #define HAS_LOGO
@@ -232,7 +235,14 @@ void setup() {
   Serial.begin(9600);
 
   // Compile a little program into the LOGO interpreter :-)
-  logo.compile("TO GO; FOREVER [ON WAIT 100 OFF WAIT 1000]; END;");
+  logo.compile("TO FLASH; ON WAIT 100 OFF WAIT 1000; END;");
+  logo.compile("TO GO; FOREVER FLASH; END;");
+  logo.compile("TO STOP; END;");
+  int err = logo.geterr();
+  if (err) {
+    flashErr(1, err + 2);
+    Serial.println(err);
+  }
  
   // this would make it just run straight away
  // logo.compile("GO");
@@ -256,6 +266,9 @@ void loop() {
     cmd.read(cmdbuf, sizeof(cmdbuf));
     Serial.println(cmdbuf);
 
+    // reset the code but keep all our words we have defined.
+    logo.resetcode();
+    
     // compile whatever it is into the LOGO interpreter and if there's
     // a compile error flash the LED
     logo.compile(cmdbuf);
@@ -301,7 +314,14 @@ void setup() {
   Wire.onReceive(receiveEvent);
 
   // Compile a little program into the LOGO interpreter :-)
-  logo.compile("TO GO; FOREVER [ON WAIT 100 OFF WAIT 1000]; END;");
+  logo.compile("TO FLASH; ON WAIT 100 OFF WAIT 1000; END;");
+  logo.compile("TO GO; FOREVER FLASH; END;");
+  logo.compile("TO STOP; END;");
+  int err = logo.geterr();
+  if (err) {
+    flashErr(1, err + 2);
+    Serial.println(err);
+  }
 }
 
 // recieve data on I2C and write it into the buffer
@@ -329,6 +349,10 @@ void loop() {
   
     // read it in
     cmd.read(cmdbuf, sizeof(cmdbuf));
+    Serial.println(cmdbuf);
+
+    // reset the code but keep all our words we have defined.
+    logo.resetcode();
     
     // compile whatever it is into the LOGO interpreter and if there's
     // a compile error flash the LED
@@ -336,11 +360,9 @@ void loop() {
     int err = logo.geterr();
     if (err) {
       flashErr(1, err + 2);
+      Serial.print("compile ");
       Serial.println(err);
     }
-    
-    // Restart the machine
-    logo.restart();
   }
 
   // just execute each LOGO word
@@ -350,6 +372,7 @@ void loop() {
   // flash the LED
   if (err && err != LG_STOP) {
     flashErr(2, err + 2);
+    Serial.print("runtime ");
     Serial.println(err);
   }
 }
@@ -372,7 +395,13 @@ void setup() {
   Wire.onReceive(receiveEvent);
 
   // Compile a little program into the LOGO interpreter :-)
-  logo.compile("TO GO; FOREVER [ON WAIT 100 OFF WAIT 1000]; END;");
+  logo.compile("TO FLASH; ON WAIT 100 OFF WAIT 1000; END;");
+  logo.compile("TO GO; FOREVER FLASH; END;");
+  logo.compile("TO STOP; END;");
+  int err = logo.geterr();
+  if (err) {
+    flashErr(1, err + 2);
+  }
 }
 
 // recieve data on I2C and write it into the buffer
@@ -396,6 +425,9 @@ void loop() {
     // read it in
     cmd.read(cmdbuf, sizeof(cmdbuf));
     
+    // reset the code but keep all our words we have defined.
+    logo.resetcode();
+    
     // compile whatever it is into the LOGO interpreter and if there's
     // a compile error flash the LED
     logo.compile(cmdbuf);
@@ -403,9 +435,6 @@ void loop() {
     if (err) {
       flashErr(1, err + 2);
     }
-    
-    // Restart the machine
-    logo.restart();
   }
 
   // just execute each LOGO word

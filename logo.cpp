@@ -50,7 +50,7 @@ LogoBuiltinWord Logo::core[] = {
 
 Logo::Logo(LogoBuiltinWord *builtins, short size, LogoBuiltinWord *core) : 
   _inword(false), _defining(-1), _defininglen(-1),
-  _jump(-1), _nextcode(0), 
+  _jump(NO_JUMP), _nextcode(0), 
   _builtins(builtins), 
   _core(core), 
   _nextstring(0), _wordcount(0), 
@@ -89,18 +89,6 @@ short Logo::run() {
   return err;
 }
 
-void Logo::reset() {
-
-  DEBUG_IN(Logo, "reset");
-  
-  for (short i=0; i<MAX_CODE; i++) {
-    _code[i]._optype = OPTYPE_NOOP;
-  }
-  _code[_startjcode-1]._optype = OPTYPE_HALT;
-  restart();
-  
-}
-
 void Logo::restart() {
 
   DEBUG_IN(Logo, "restart");
@@ -110,6 +98,41 @@ void Logo::restart() {
   for (short i=0; i<MAX_STACK; i++) {
     _stack[i]._optype = OPTYPE_NOOP;
   }
+  
+}
+
+void Logo::reset() {
+
+  DEBUG_IN(Logo, "reset");
+  
+  // ALL the code
+  for (short i=0; i<MAX_CODE; i++) {
+    _code[i]._optype = OPTYPE_NOOP;
+  }
+  _code[_startjcode-1]._optype = OPTYPE_HALT;
+  _nextstring = 0;
+  _nextcode = 0;
+  _nextjcode = _startjcode;
+  _wordcount = 0;
+  _varcount = 0;
+  _sentencecount = 0;
+  
+  restart();
+  
+}
+
+void Logo::resetcode() {
+
+  DEBUG_IN(Logo, "resetcode");
+  
+  // Just the code up to the words.
+  for (short i=0; i<_startjcode-1; i++) {
+    _code[i]._optype = OPTYPE_NOOP;
+  }
+  _nextcode = 0;
+  _varcount = 0;
+  
+  restart();
   
 }
 
@@ -140,6 +163,8 @@ bool Logo::stackempty() {
 #ifdef HAS_VARIABLES
 short Logo::getvarfromref(const LogoInstruction &entry) {
 
+  DEBUG_IN(Logo, "getvarfromref");
+  
   getstring(_tmpbuf, sizeof(_tmpbuf), entry._op, entry._opand);
   return findvariable(_tmpbuf);
 
@@ -311,7 +336,13 @@ bool Logo::codeisnum(short rel) {
 #ifdef HAS_VARIABLES
   if (_code[_pc+rel]._optype == OPTYPE_REF) {
     short var = getvarfromref(_code[_pc+rel]);
-    val = _variables[var]._type == OPTYPE_NUM;
+    if (var >= 0) {
+      val = _variables[var]._type == OPTYPE_NUM;
+    }
+    else {
+      // it's missing, say it's a num.
+      val = true;
+    }
     DEBUG_RETURN(" ref %b", val);
     return val;
   }
@@ -325,17 +356,23 @@ bool Logo::codeisnum(short rel) {
 
 short Logo::codetonum(short rel) {
 
-  DEBUG_IN_ARGS(Logo, "push", "%i", rel);
+  DEBUG_IN_ARGS(Logo, "codetonum", "%i", rel);
   
   short val;
 #ifdef HAS_VARIABLES
   if (_code[_pc+rel]._optype == OPTYPE_REF) {
     short var = getvarfromref(_code[_pc+rel]);
-    if (_variables[var]._type != OPTYPE_NUM) {
-      error(LG_NOT_NUM);
-      return 0;
+    if (var >= 0) {
+      if (_variables[var]._type != OPTYPE_NUM) {
+        error(LG_NOT_NUM);
+        return 0;
+      }
+      val = _variables[var]._value;
     }
-    val = _variables[var]._value;
+    else {
+      // a mssing var just report as 0
+      val = 0;
+    }
     DEBUG_RETURN(" ref %i", val);
     return val;
   }
@@ -371,6 +408,8 @@ void Logo::codetostring(short rel, tStrPool *s, tStrPool *len) {
 
 void Logo::jumpskip(short rel) {
 
+  DEBUG_IN_ARGS(Logo, "jumpskip", "%i", rel);
+  
   if (_tos >= MAX_STACK) {
     error(LG_STACK_OVERFLOW);
     return;
@@ -399,12 +438,6 @@ void Logo::condreturn(short rel) {
     return;
   }
   
-  // only patch for words.
-  if (_code[_pc+1]._optype != OPTYPE_WORD) {
-    error(LG_NOT_NUM);
-    return;
-  }
-  
   // push the return adddres
   _stack[_tos]._optype = SOPTYPE_CONDRET;
   _stack[_tos]._op = _pc + rel;
@@ -420,6 +453,11 @@ bool Logo::call(const LogoWord &word) {
   
   if (_tos >= MAX_STACK) {
     return false;
+  }
+  
+  if (word._jump == NO_JUMP) {
+    DEBUG_RETURN(" word ignored", 0);
+    return true;
   }
   
   // push the return adddres
@@ -476,9 +514,17 @@ short Logo::step() {
     {
       short var = getvarfromref(_code[_pc]);
       LogoInstruction inst;
-      inst._optype = _variables[var]._type;
-      inst._op = _variables[var]._value;
-      inst._opand = _variables[var]._valuelen;
+      if (var >= 0) {
+        inst._optype = _variables[var]._type;
+        inst._op = _variables[var]._value;
+        inst._opand = _variables[var]._valuelen;
+      }
+      else {
+        // just push qa zero
+        inst._optype = OPTYPE_NUM;
+        inst._op = 0;
+        inst._opand = 0;
+      }
       if (!push(inst)) {
         err = LG_STACK_OVERFLOW;
       }
@@ -606,12 +652,7 @@ short Logo::doreturn() {
 #ifdef HAS_IFELSE
     if (_stack[ret-1]._optype == SOPTYPE_CONDRET) {
   
-      if (_stack[ret+1]._optype != OPTYPE_NUM) {
-        DEBUG_RETURN(" no num", 0);
-        return LG_NOT_NUM;
-      }
-    
-      if (_stack[ret+1]._op) {
+      if (_stack[ret+1]._optype == OPTYPE_NUM && _stack[ret+1]._op) {
         // condition was true
         DEBUG_OUT("condition true", 0);
         _pc = _stack[ret-1]._op;
@@ -620,7 +661,7 @@ short Logo::doreturn() {
         _stack[_tos-1]._op = 0;
       }
       else {
-        // condition is false
+        // condition is false (or not a number)
         DEBUG_OUT("conditional false", 0);
         _pc = _stack[ret-1]._op + 1;
         _tos = ret-1;
@@ -1002,9 +1043,6 @@ void Logo::compilewords(const char *buf, short len, bool define) {
       error(LG_WORD_TOO_LONG);
       return;
     }
-    if (!_wordbuf[0]) {
-      break;
-    }
     if (define) {
       if (!dodefine(_wordbuf)) {
         if (_nextcode >= _startjcode) {
@@ -1133,7 +1171,7 @@ void Logo::error(short error) {
 
 bool Logo::dodefine(const char *word) {
 
-  DEBUG_IN_ARGS(Logo, "dodefine", "%s", word);
+  DEBUG_IN_ARGS(Logo, "dodefine", "%s%b", word, _inword);
   
   if (*word == 0) {
     DEBUG_RETURN(" empty word %b", false);
@@ -1179,7 +1217,7 @@ bool Logo::dodefine(const char *word) {
       finishword(_defining, _defininglen, _jump);
       _defining = -1;
       _defininglen = -1;
-      _jump = -1;
+      _jump = NO_JUMP;
       DEBUG_RETURN(" finished word %b", true);
       return true;
     }
@@ -1187,7 +1225,7 @@ bool Logo::dodefine(const char *word) {
   }
     
   // first word we define in our word, remember where we are.
-  if (_jump < 0) {
+  if (_jump == NO_JUMP) {
     _jump = _nextjcode;
   }
   
@@ -1243,7 +1281,7 @@ void Logo::entab(short indent) const {
 void Logo::printword(const LogoWord &word) const {
   char name[32];
   getstring(name, sizeof(name), word._name, word._namelen);
-  cout << name;
+  cout  << name << " (" << _jump << ")";
 }
 
 void Logo::dump(short indent, short type, short op, short opand) const {

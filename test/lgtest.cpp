@@ -218,6 +218,24 @@ BOOST_AUTO_TEST_CASE( defineCompoundWordRun1 )
   
 }
 
+BOOST_AUTO_TEST_CASE( defineEmptyWord )
+{
+  cout << "=== defineEmptyWord ===" << endl;
+  
+  LogoBuiltinWord empty[] = {};
+  Logo logo(empty, 0);
+
+  logo.compile("TO TEST1; END;");
+  logo.compile("TEST1");
+  BOOST_CHECK_EQUAL(logo.geterr(), 0);
+  DEBUG_DUMP(false);
+
+  gCmds.clear();
+  BOOST_CHECK_EQUAL(logo.run(), 0);
+  BOOST_CHECK_EQUAL(gCmds.size(), 0);
+  
+}
+
 #ifdef HAS_SENTENCES
 
 BOOST_AUTO_TEST_CASE( sentence )
@@ -546,7 +564,6 @@ BOOST_AUTO_TEST_CASE( literalsOnStack )
   DEBUG_DUMP(false);
   
 }
-
 
 BOOST_AUTO_TEST_CASE( sizes )
 {

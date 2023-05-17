@@ -92,11 +92,11 @@
 #define STRING_POOL_SIZE  256       // these number of bytes
 #define LINE_LEN          64        // these number of bytes
 #define WORD_LEN          32        // these number of bytes
-#define MAX_WORDS         32        // 3 bytes each
-#define MAX_CODE          120       // 6 bytes each
+#define MAX_WORDS         20        // 3 bytes each
+#define MAX_CODE          100       // 6 bytes each
 #define MAX_STACK         40        // 6 bytes each
 #ifdef HAS_VARIABLES
-#define MAX_VARS          12        // 6 bytes each
+#define MAX_VARS          8         // 6 bytes each
 #endif
 
 #include <string.h>
@@ -159,8 +159,10 @@ typedef unsigned char tType;
 // allow the code jump to be a char if the code is small.
 #if MAX_CODE <= 256
 typedef unsigned char tJump;
+#define NO_JUMP   255
 #else
 typedef short tJump;
+#define NO_JUMP   -1
 #endif
 
 typedef struct {
@@ -248,8 +250,9 @@ public:
   // main execution
   short step();
   short run();
-  void restart(); // run from the top
-  void reset(); // reset all the code, everything.
+  void restart(); // run from the top, resets the stack
+  void reset(); // reset all the code, words and stack
+  void resetcode(); // reset all the code, leaves the words and restarrs
   void fail(short err);
   
   // dealing with the stack
