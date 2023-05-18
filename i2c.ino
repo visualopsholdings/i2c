@@ -60,6 +60,12 @@ void ledOff() {
   digitalWrite(LED_PIN, LOW);
 }
 
+ifdef HAS_LOGO
+void wait(Logo &logo) {
+  delay(logo.popint());
+}
+#endif
+
 #if defined(HAS_SERIAL) || defined(HAS_I2C)
 RingBuffer buffer;
 Cmd cmd;
@@ -70,37 +76,49 @@ char cmdbuf[64];
 LogoBuiltinWord builtins[] = {
   { "ON", &ledOn },
   { "OFF", &ledOff },
+  { "WAIT", &wait, 1 },
 };
-class ArduinoTimeProvider: public LogoTimeProvider {
+// not currently working.
+// class ArduinoTimeProvider: public LogoTimeProvider {
+// 
+// public:
+//   ArduinoTimeProvider() : _lasttime(0), _nexttime(0) {}
+// 
+//   // LogoTimeProvider
+//   virtual void schedule(short ms);
+//   virtual bool next();
+//   
+// private:
+//   unsigned long _lasttime;
+//   unsigned long _nexttime;
+// };
+// void ArduinoTimeProvider::schedule(short ms) {
+//   if (_lasttime == 0) {
+//     _lasttime = millis();
+//   }
+//   _nexttime = _lasttime + ms;
+// }
+// bool ArduinoTimeProvider::next() {
+//   return true;
+//   unsigned long now = millis();
+//   if (now >= _nexttime) {
+//     _nexttime = 0;
+//     return true;
+//   }
+//   delay(20);
+//   return false;
+// }
+// ArduinoTimeProvider time;
+class NullTimeProvider: public LogoTimeProvider {
 
 public:
-  ArduinoTimeProvider() : _lasttime(0), _nexttime(0) {}
-
-  // LogoTimeProvider
-  virtual void schedule(short ms);
-  virtual bool next();
   
-private:
-  unsigned long _lasttime;
-  unsigned long _nexttime;
+  // LogoTimeProvider
+  virtual void schedule(short ms) {}
+  virtual bool next() { return true; }
+  
 };
-void ArduinoTimeProvider::schedule(short ms) {
-  if (_lasttime == 0) {
-    _lasttime = millis();
-  }
-  _nexttime = _lasttime + ms;
-}
-bool ArduinoTimeProvider::next() {
-  return true;
-  unsigned long now = millis();
-  if (now >= _nexttime) {
-    _nexttime = 0;
-    return true;
-  }
-  delay(20);
-  return false;
-}
-ArduinoTimeProvider time;
+NullTimeProvider time;
 Logo logo(builtins, sizeof(builtins), &time, Logo::core);
 #endif
 

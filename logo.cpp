@@ -46,7 +46,8 @@ LogoBuiltinWord Logo::core[] = {
   { "IFELSE", LogoWords::ifelse, LogoWords::ifelseArity },
 #endif
   { "=", LogoWords::eq, LogoWords::eqArity },
-  { "WAIT", LogoWords::wait, LogoWords::waitArity },
+// more testing needed
+//  { "WAIT", LogoWords::wait, LogoWords::waitArity },
 };
 
 Logo::Logo(LogoBuiltinWord *builtins, short size, LogoTimeProvider *time, LogoBuiltinWord *core) : 

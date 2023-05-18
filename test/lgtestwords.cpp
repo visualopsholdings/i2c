@@ -473,47 +473,47 @@ private:
   short _scheduled;
   
 };
-
-BOOST_AUTO_TEST_CASE( waitWordFired )
-{
-  cout << "=== waitWordFired ===" << endl;
-  
-  LogoBuiltinWord builtins[] = {
-    { "ON", &ledOn },
-  };
-
-  TestTimeProvider time;
-  Logo logo(builtins, sizeof(builtins), &time, Logo::core);
- 
-  logo.compile("WAIT 1000 ON");
-  BOOST_CHECK_EQUAL(logo.geterr(), 0);
-  DEBUG_DUMP(false);
-
-  time.settime(1500);
-  
-  DEBUG_STEP_DUMP(10, false);
-  BOOST_CHECK_EQUAL(logo.run(), 0);
-  BOOST_CHECK(time.fired());
-
-}
-
-BOOST_AUTO_TEST_CASE( waitWordNotReady )
-{
-  cout << "=== waitWordNotReady ===" << endl;
-  
-  LogoBuiltinWord builtins[] = {
-    { "ON", &ledOn },
-  };
-
-  TestTimeProvider time;
-  Logo logo(builtins, sizeof(builtins), &time, Logo::core);
- 
-  logo.compile("WAIT 1000 ON");
-  BOOST_CHECK_EQUAL(logo.geterr(), 0);
-  DEBUG_DUMP(false);
-
-  DEBUG_STEP_DUMP(10, false);
-  BOOST_CHECK_EQUAL(logo.run(), 0);
-  BOOST_CHECK(!time.fired());
-
-}
+// 
+// BOOST_AUTO_TEST_CASE( waitWordFired )
+// {
+//   cout << "=== waitWordFired ===" << endl;
+//   
+//   LogoBuiltinWord builtins[] = {
+//     { "ON", &ledOn },
+//   };
+// 
+//   TestTimeProvider time;
+//   Logo logo(builtins, sizeof(builtins), &time, Logo::core);
+//  
+//   logo.compile("WAIT 1000 ON");
+//   BOOST_CHECK_EQUAL(logo.geterr(), 0);
+//   DEBUG_DUMP(false);
+// 
+//   time.settime(1500);
+//   
+//   DEBUG_STEP_DUMP(10, false);
+//   BOOST_CHECK_EQUAL(logo.run(), 0);
+//   BOOST_CHECK(time.fired());
+// 
+// }
+// 
+// BOOST_AUTO_TEST_CASE( waitWordNotReady )
+// {
+//   cout << "=== waitWordNotReady ===" << endl;
+//   
+//   LogoBuiltinWord builtins[] = {
+//     { "ON", &ledOn },
+//   };
+// 
+//   TestTimeProvider time;
+//   Logo logo(builtins, sizeof(builtins), &time, Logo::core);
+//  
+//   logo.compile("WAIT 1000 ON");
+//   BOOST_CHECK_EQUAL(logo.geterr(), 0);
+//   DEBUG_DUMP(false);
+// 
+//   DEBUG_STEP_DUMP(10, false);
+//   BOOST_CHECK_EQUAL(logo.run(), 0);
+//   BOOST_CHECK(!time.fired());
+// 
+// }

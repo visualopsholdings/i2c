@@ -392,7 +392,7 @@ WORD := [wordname | SENTENCE | LITERAL]
 SENTENCE := "[" LITWORD ... "]"
 LITWORD := the name of a word
 
-## WAIT
+## WAIT (not working yet so not in current build)
 
 Wait for milliseconds before executing the next word. The syntax is:
 

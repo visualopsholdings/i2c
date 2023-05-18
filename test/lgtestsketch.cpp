@@ -27,7 +27,7 @@ using namespace std;
 
 vector<string> gCmds;
 
-#define PRINT_RESULT
+//#define PRINT_RESULT
 
 void ledOn(Logo &logo) {
   gCmds.push_back("LED ON");
@@ -97,6 +97,16 @@ bool RealTimeProvider::next() {
 
 }
 
+class NullTimeProvider: public LogoTimeProvider {
+
+public:
+  
+  // LogoTimeProvider
+  virtual void schedule(short ms) {}
+  virtual bool next() { return true; }
+  
+};
+
 #if defined(HAS_FOREVER)
 
 BOOST_AUTO_TEST_CASE( bigSketch )
@@ -106,8 +116,10 @@ BOOST_AUTO_TEST_CASE( bigSketch )
   LogoBuiltinWord builtins[] = {
     { "ON", &ledOn },
     { "OFF", &ledOff },
+    { "WAIT", &wait, 1 },
   };
-  RealTimeProvider time;
+//  RealTimeProvider time;
+  NullTimeProvider time;
   Logo logo(builtins, sizeof(builtins), &time, Logo::core);
 
   logo.compile("TO FLASH; ON WAIT 1000 OFF WAIT 2000; END;");
@@ -130,28 +142,28 @@ BOOST_AUTO_TEST_CASE( bigSketch )
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
 
   gCmds.clear();
-  BOOST_CHECK_EQUAL(logo.run(), 0);
-//  DEBUG_STEP_DUMP(20, false);
-//   for (int i=0; i<400; i++) {
-//     BOOST_CHECK_EQUAL(logo.step(), 0);
-//   }
-//   BOOST_CHECK_EQUAL(gCmds.size(), 49);
-//   BOOST_CHECK_EQUAL(gCmds[0], "LED ON");
-//   BOOST_CHECK_EQUAL(gCmds[1], "WAIT 100");
-//   BOOST_CHECK_EQUAL(gCmds[2], "LED OFF");
-//   BOOST_CHECK_EQUAL(gCmds[3], "WAIT 1000");
-//   BOOST_CHECK_EQUAL(gCmds[4], "LED ON");
+//  BOOST_CHECK_EQUAL(logo.run(), 0);
+  DEBUG_STEP_DUMP(20, false);
+  for (int i=0; i<100; i++) {
+    BOOST_CHECK_EQUAL(logo.step(), 0);
+  }
+  BOOST_CHECK_EQUAL(gCmds.size(), 49);
+  BOOST_CHECK_EQUAL(gCmds[0], "LED ON");
+  BOOST_CHECK_EQUAL(gCmds[1], "WAIT 1000");
+  BOOST_CHECK_EQUAL(gCmds[2], "LED OFF");
+  BOOST_CHECK_EQUAL(gCmds[3], "WAIT 2000");
+  BOOST_CHECK_EQUAL(gCmds[4], "LED ON");
     
-//   logo.resetcode();
-//   logo.compile("STOP");
-//   BOOST_CHECK_EQUAL(logo.geterr(), 0);
-//   DEBUG_DUMP(false);
-//   gCmds.clear();
-// //  DEBUG_STEP_DUMP(100, false);
-//   for (int i=0; i<10; i++) {
-//     BOOST_CHECK_EQUAL(logo.step(), 0);
-//   }
-//   BOOST_CHECK_EQUAL(gCmds.size(), 0);
+  logo.resetcode();
+  logo.compile("STOP");
+  BOOST_CHECK_EQUAL(logo.geterr(), 0);
+  DEBUG_DUMP(false);
+  gCmds.clear();
+//  DEBUG_STEP_DUMP(100, false);
+  for (int i=0; i<10; i++) {
+    BOOST_CHECK_EQUAL(logo.step(), 0);
+  }
+  BOOST_CHECK_EQUAL(gCmds.size(), 0);
   
 }
 
@@ -164,11 +176,12 @@ BOOST_AUTO_TEST_CASE( smallSketch )
   LogoBuiltinWord builtins[] = {
     { "ON", &ledOn },
     { "OFF", &ledOff },
+    { "WAIT", &wait, 1 },
   };
   RealTimeProvider time;
   Logo logo(builtins, sizeof(builtins), &time, Logo::core);
 
-  logo.compile("TO FLASH; ON WAIT 100 OFF WAIT 1000; END;");
+  logo.compile("TO FLASH; ON WAIT 1000 OFF WAIT 2000; END;");
   logo.compile("FLASH");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
   DEBUG_DUMP(false);
@@ -178,9 +191,9 @@ BOOST_AUTO_TEST_CASE( smallSketch )
   BOOST_CHECK_EQUAL(logo.run(), 0);
   BOOST_CHECK_EQUAL(gCmds.size(), 4);
   BOOST_CHECK_EQUAL(gCmds[0], "LED ON");
-  BOOST_CHECK_EQUAL(gCmds[1], "WAIT 100");
+  BOOST_CHECK_EQUAL(gCmds[1], "WAIT 1000");
   BOOST_CHECK_EQUAL(gCmds[2], "LED OFF");
-  BOOST_CHECK_EQUAL(gCmds[3], "WAIT 1000");
+  BOOST_CHECK_EQUAL(gCmds[3], "WAIT 2000");
     
 }
 
