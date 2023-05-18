@@ -46,9 +46,10 @@ LogoBuiltinWord Logo::core[] = {
   { "IFELSE", LogoWords::ifelse, LogoWords::ifelseArity },
 #endif
   { "=", LogoWords::eq, LogoWords::eqArity },
+  { "WAIT", LogoWords::wait, LogoWords::waitArity },
 };
 
-Logo::Logo(LogoBuiltinWord *builtins, short size, LogoBuiltinWord *core) : 
+Logo::Logo(LogoBuiltinWord *builtins, short size, LogoTimeProvider *time, LogoBuiltinWord *core) : 
   _inword(false), _defining(-1), _defininglen(-1),
   _jump(NO_JUMP), _nextcode(0), 
   _builtins(builtins), 
@@ -69,7 +70,9 @@ Logo::Logo(LogoBuiltinWord *builtins, short size, LogoBuiltinWord *core) :
   _startjcode = _nextjcode = MAX_CODE/2;
 
   reset();
-  
+
+  _time = time;
+    
 }
 
 short Logo::run() {
@@ -477,6 +480,10 @@ short Logo::step() {
 
 //  DEBUG_IN(Logo, "step");
   
+  if (!_time->next()) {
+    return 0;
+  }
+
   short err = doarity();
   if (err) {
     return err;
@@ -1642,4 +1649,14 @@ void LogoWords::ifelse(Logo &logo) {
 //  logo.dumpstack(false);
   
 }
+
+short LogoWords::waitArity = 1;
+
+void LogoWords::wait(Logo &logo) {
+
+  // schedule the next word to execute after a certain time.
+  logo.schedulenext(logo.popint());
+  
+}
+
 #endif

@@ -51,13 +51,24 @@ void wait(Logo &logo) {
 #endif
 }
 
+class NullTimeProvider: public LogoTimeProvider {
+
+public:
+  
+  // LogoTimeProvider
+  virtual void schedule(short ms) {}
+  virtual bool next() { return true; }
+  
+};
+
 #ifdef HAS_VARIABLES
 BOOST_AUTO_TEST_CASE( make )
 {
   cout << "=== make ===" << endl;
   
   LogoBuiltinWord empty[] = {};
-  Logo logo(empty, 0, Logo::core);
+  NullTimeProvider time;
+  Logo logo(empty, 0, &time, Logo::core);
 
   logo.compile("MAKE \"VAR 10");
   logo.compile(":VAR");
@@ -80,7 +91,8 @@ BOOST_AUTO_TEST_CASE( makeChange )
     { "WAIT", &wait, 1 },
  };
 
-  Logo logo(builtins, sizeof(builtins), Logo::core);
+  NullTimeProvider time;
+  Logo logo(builtins, sizeof(builtins), &time, Logo::core);
 
   logo.compile("MAKE \"num 100");
   logo.compile("MAKE \"num 200");
@@ -109,7 +121,8 @@ BOOST_AUTO_TEST_CASE( forever )
     { "WAIT", &wait, 1 },
   };
 
-  Logo logo(builtins, sizeof(builtins), Logo::core);
+  NullTimeProvider time;
+  Logo logo(builtins, sizeof(builtins), &time, Logo::core);
 
   logo.compile("1 2 FOREVER [ON WAIT 10 OFF WAIT 20];");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
@@ -139,7 +152,8 @@ BOOST_AUTO_TEST_CASE( repeat )
     { "WAIT", &wait, 1 },
   };
 
-  Logo logo(builtins, sizeof(builtins), Logo::core);
+  NullTimeProvider time;
+   Logo logo(builtins, sizeof(builtins), &time, Logo::core);
 
   logo.compile("REPEAT 3 [ON WAIT 10 OFF WAIT 20];");
   DEBUG_DUMP(false);
@@ -166,7 +180,8 @@ BOOST_AUTO_TEST_CASE( eq )
   cout << "=== eq ===" << endl;
   
   LogoBuiltinWord empty[] = {};
-  Logo logo(empty, 0, Logo::core);
+  NullTimeProvider time;
+  Logo logo(empty, 0, &time, Logo::core);
 
   logo.compile("1 = 3");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
@@ -193,7 +208,8 @@ BOOST_AUTO_TEST_CASE( ifelseFalse )
   cout << "=== ifelseFalse ===" << endl;
   
   LogoBuiltinWord empty[] = {};
-  Logo logo(empty, 0, Logo::core);
+  NullTimeProvider time;
+  Logo logo(empty, 0, &time, Logo::core);
 
   logo.compile("TO TEST; 0; END");
   logo.compile("TO THEN; 2; END");
@@ -215,7 +231,8 @@ BOOST_AUTO_TEST_CASE( ifelseTrue )
   cout << "=== ifelseTrue ===" << endl;
   
   LogoBuiltinWord empty[] = {};
-  Logo logo(empty, 0, Logo::core);
+  NullTimeProvider time;
+  Logo logo(empty, 0, &time, Logo::core);
 
   logo.compile("TO TEST; 1; END");
   logo.compile("TO THEN; 2; END");
@@ -238,7 +255,8 @@ BOOST_AUTO_TEST_CASE( ifelseCond )
   cout << "=== ifelseCond ===" << endl;
   
   LogoBuiltinWord empty[] = {};
-  Logo logo(empty, 0, Logo::core);
+  NullTimeProvider time;
+  Logo logo(empty, 0, &time, Logo::core);
 
   logo.compile("IFELSE [1 = 0] [2] [3]");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
@@ -256,7 +274,8 @@ BOOST_AUTO_TEST_CASE( ifelseSentences )
   cout << "=== ifelseSentences ===" << endl;
   
   LogoBuiltinWord empty[] = {};
-  Logo logo(empty, 0, Logo::core);
+  NullTimeProvider time;
+  Logo logo(empty, 0, &time, Logo::core);
 
   logo.compile("IFELSE [1] [2] [3]");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
@@ -273,7 +292,8 @@ BOOST_AUTO_TEST_CASE( ifelseLiteralTrueCond )
   cout << "=== ifelseLiteralTrueCond ===" << endl;
   
   LogoBuiltinWord empty[] = {};
-  Logo logo(empty, 0, Logo::core);
+  NullTimeProvider time;
+  Logo logo(empty, 0, &time, Logo::core);
 
   logo.compile("IFELSE 1 [2] [3]");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
@@ -291,7 +311,8 @@ BOOST_AUTO_TEST_CASE( ifelseLiteralFalseCond )
   cout << "=== ifelseLiteralFalseCond ===" << endl;
   
   LogoBuiltinWord empty[] = {};
-  Logo logo(empty, 0, Logo::core);
+  NullTimeProvider time;
+  Logo logo(empty, 0, &time, Logo::core);
 
   logo.compile("IFELSE 0 [2] [3]");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
@@ -311,7 +332,8 @@ BOOST_AUTO_TEST_CASE( ifelseTrueLiteralNumBranches )
   cout << "=== ifelseTrueLiteralNumBranches ===" << endl;
   
   LogoBuiltinWord empty[] = {};
-  Logo logo(empty, 0, Logo::core);
+  NullTimeProvider time;
+  Logo logo(empty, 0, &time, Logo::core);
 
   logo.compile("IFELSE 1 2 3");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
@@ -329,7 +351,8 @@ BOOST_AUTO_TEST_CASE( ifelseFalseLiteralNumBranches )
   cout << "=== ifelseFalseLiteralNumBranches ===" << endl;
   
   LogoBuiltinWord empty[] = {};
-  Logo logo(empty, 0, Logo::core);
+  NullTimeProvider time;
+  Logo logo(empty, 0, &time, Logo::core);
 
   logo.compile("IFELSE 0 2 3");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
@@ -347,7 +370,8 @@ BOOST_AUTO_TEST_CASE( ifelseTrueLiteralStringBranches )
   cout << "=== ifelseTrueLiteralStringBranches ===" << endl;
   
   LogoBuiltinWord empty[] = {};
-  Logo logo(empty, 0, Logo::core);
+  NullTimeProvider time;
+  Logo logo(empty, 0, &time, Logo::core);
 
   logo.compile("IFELSE 1 \"A \"B");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
@@ -367,7 +391,8 @@ BOOST_AUTO_TEST_CASE( ifelseFalseLiteralStringBranches )
   cout << "=== ifelseTrueLiteralStringBranches ===" << endl;
   
   LogoBuiltinWord empty[] = {};
-  Logo logo(empty, 0, Logo::core);
+  NullTimeProvider time;
+  Logo logo(empty, 0, &time, Logo::core);
 
   logo.compile("IFELSE 0 \"A \"B");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
@@ -389,7 +414,8 @@ BOOST_AUTO_TEST_CASE( ifelseVarRef )
   cout << "=== ifelseVarRef ===" << endl;
   
   LogoBuiltinWord empty[] = {};
-  Logo logo(empty, 0, Logo::core);
+  NullTimeProvider time;
+  Logo logo(empty, 0, &time, Logo::core);
 
   logo.compile("MAKE \"VAR 1");
   logo.compile("IFELSE :VAR \"A \"B");
@@ -410,7 +436,8 @@ BOOST_AUTO_TEST_CASE( ifelseMissingVar )
   cout << "=== ifelseMissingVar ===" << endl;
   
   LogoBuiltinWord empty[] = {};
-  Logo logo(empty, 0, Logo::core);
+  NullTimeProvider time;
+  Logo logo(empty, 0, &time, Logo::core);
 
   logo.compile("IFELSE :VAR \"A \"B");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
@@ -429,3 +456,64 @@ BOOST_AUTO_TEST_CASE( ifelseMissingVar )
 
 #endif // HAS_IFELSE
 
+class TestTimeProvider: public LogoTimeProvider {
+
+public:
+  TestTimeProvider() : _time(0), _scheduled(0) {};
+  
+  void settime(int time) { _time = time; }
+  bool fired() { return _time >= _scheduled; }
+  
+  // LogoTimeProvider
+  virtual void schedule(short ms) { _scheduled = ms; }
+  virtual bool next() { return true; }
+  
+private:
+  int _time;
+  short _scheduled;
+  
+};
+
+BOOST_AUTO_TEST_CASE( waitWordFired )
+{
+  cout << "=== waitWordFired ===" << endl;
+  
+  LogoBuiltinWord builtins[] = {
+    { "ON", &ledOn },
+  };
+
+  TestTimeProvider time;
+  Logo logo(builtins, sizeof(builtins), &time, Logo::core);
+ 
+  logo.compile("WAIT 1000 ON");
+  BOOST_CHECK_EQUAL(logo.geterr(), 0);
+  DEBUG_DUMP(false);
+
+  time.settime(1500);
+  
+  DEBUG_STEP_DUMP(10, false);
+  BOOST_CHECK_EQUAL(logo.run(), 0);
+  BOOST_CHECK(time.fired());
+
+}
+
+BOOST_AUTO_TEST_CASE( waitWordNotReady )
+{
+  cout << "=== waitWordNotReady ===" << endl;
+  
+  LogoBuiltinWord builtins[] = {
+    { "ON", &ledOn },
+  };
+
+  TestTimeProvider time;
+  Logo logo(builtins, sizeof(builtins), &time, Logo::core);
+ 
+  logo.compile("WAIT 1000 ON");
+  BOOST_CHECK_EQUAL(logo.geterr(), 0);
+  DEBUG_DUMP(false);
+
+  DEBUG_STEP_DUMP(10, false);
+  BOOST_CHECK_EQUAL(logo.run(), 0);
+  BOOST_CHECK(!time.fired());
+
+}

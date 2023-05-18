@@ -335,7 +335,72 @@ Open "i2c.ino" and you can flash that example right onto your Arduino and try it
 There are about 5 different examples in there of various other things to get you started using
 the various ways you might use this stuff.
 
+One nice feature of the LOGO code is that implements WAIT the correct way without using delay().
+
 You can read more about logo here https://en.wikipedia.org/wiki/Logo_(programming_language)
+
+### LOGO words
+
+## MAKE 
+
+Make a variable. The syntax is:
+
+MAKE "VARNAME VALUE
+VALUE := [number | string] 
+
+## FOREVER
+
+Repeat the next word forever. The syntax is:
+
+REPEAT WORD
+WORD := [wordname | SENTENCE]
+SENTENCE := "[" LITWORD ... "]"
+LITWORD := the name of a word
+
+## REPEAT
+
+Repeat the next word a number of times. The syntax is:
+
+REPEAT NUM WORD
+NUM := [number | VAR]
+VAR := :varname
+WORD := [wordname | SENTENCE | LITERAL]
+LITERAL := [number | string } VAR] 
+VAR := :varname
+SENTENCE := "[" LITWORD ... "]"
+LITWORD := the name of a word
+
+## IFELSE
+
+Test an expression, it true put the first word on the stack else the second. The syntax is:
+
+IFELSE EXPR THEN ELSE
+EXPR := [wordname | SENTENCE | LITERAL]
+LITERAL := [number | string } VAR] 
+VAR := :varname
+THEN := [wordname | SENTENCE | LITERAL]
+ELSE := [wordname | SENTENCE | LITERAL]
+SENTENCE := "[" LITWORD ... "]"
+LITWORD := the name of a word
+
+## =
+
+Push a 1 on the stack if the operands are the same. The syntax is:
+
+WORD = WORD
+WORD := [wordname | SENTENCE | LITERAL]
+SENTENCE := "[" LITWORD ... "]"
+LITWORD := the name of a word
+
+## WAIT
+
+Wait for milliseconds before executing the next word. The syntax is:
+
+WAIT NUM WORD
+NUM := [number | VAR]
+WORD := [wordname | SENTENCE]
+SENTENCE := "[" LITWORD ... "]"
+LITWORD := the name of a word
 
 ## Development
 
@@ -402,10 +467,4 @@ https://forum.arduino.cc/t/how-to-properly-use-wire-onreceive/891195/12
 
 ## Current development focus
 
-### A LOGO "WAIT"
-
-The use of "delay()" on the Arduino is a very bad idea, especially like above. The use
-of the LOGO interpreter gives us the perfect opportunity to provide a similar function that 
-simply does schedules the next WORD to arrive after a certain time. Unlike UCB LOGO it will
-be in milliseconds rather than 60's of a second.
-
+### OUTPUT from the Arduino to the PI

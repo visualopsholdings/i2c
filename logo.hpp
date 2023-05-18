@@ -18,17 +18,12 @@
     ... turn an LED off
   }
 
-  void wait(Logo &logo) {
-    int time = logo.popint();
-    ... wait for this time
-  }
-  
   LogoBuiltinWord builtins[] = {
     { "ON", &ledOn },
-    { "OFF", &ledOff },
-    { "WAIT", &wait, 1 },
+    { "OFF", &ledOff ,
   };
-  Logo logo(builtins, sizeof(builtins), &Logo::core);
+  ArduinoTimeProvider time;
+  Logo logo(builtins, sizeof(builtins), &time, &Logo::core);
   logo.compile("TO GO; FOREVER [ON WAIT 100 OFF WAIT 1000]; END;");
 
   ... then on some trigger
@@ -224,6 +219,9 @@ public:
   static short makeArity;
 #endif
 
+  static void wait(Logo &logo);
+  static short waitArity;
+
 private:
 
 #ifdef HAS_IFELSE
@@ -232,10 +230,19 @@ private:
 
 };
 
+class LogoTimeProvider {
+
+public:
+
+  virtual void schedule(short ms) = 0;
+  virtual bool next() = 0;
+    
+};
+
 class Logo {
 
 public:
-  Logo(LogoBuiltinWord *builtins, short size, LogoBuiltinWord *core=0);
+  Logo(LogoBuiltinWord *builtinsr, short size, LogoTimeProvider *time, LogoBuiltinWord *core=0);
   ~Logo() {}
   
   // the compiler.
@@ -254,6 +261,9 @@ public:
   void reset(); // reset all the code, words and stack
   void resetcode(); // reset all the code, leaves the words and restarrs
   void fail(short err);
+  void schedulenext(short delay) { 
+    _time->schedule(delay); 
+  }
   
   // dealing with the stack
   bool stackempty();
@@ -353,6 +363,8 @@ private:
 
   void dosentences(char *buf, short len, const char *start);
 #endif
+  
+  LogoTimeProvider *_time;
   
   // parser
   bool dodefine(const char *word);
