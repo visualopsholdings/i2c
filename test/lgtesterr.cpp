@@ -24,15 +24,11 @@
 
 using namespace std;
 
-class NullTimeProvider: public LogoTimeProvider {
+vector<string> gCmds;
 
-public:
-  
-  // LogoTimeProvider
-  virtual void schedule(short ms) {}
-  virtual bool next() { return true; }
-  
-};
+//#define PRINT_RESULT
+
+#include "nulltimeprovider.hpp"
 
 BOOST_AUTO_TEST_CASE( unknownWord )
 {

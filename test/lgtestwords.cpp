@@ -42,24 +42,7 @@ void ledOff(Logo &logo) {
 #endif
 }
 
-void wait(Logo &logo) {
-  strstream str;
-  str << "WAIT " << logo.popint();
-  gCmds.push_back(str.str());
-#ifdef PRINT_RESULT
-  cout << gCmds.back() << endl;
-#endif
-}
-
-class NullTimeProvider: public LogoTimeProvider {
-
-public:
-  
-  // LogoTimeProvider
-  virtual void schedule(short ms) {}
-  virtual bool next() { return true; }
-  
-};
+#include "nulltimeprovider.hpp"
 
 #ifdef HAS_VARIABLES
 BOOST_AUTO_TEST_CASE( make )
@@ -87,12 +70,9 @@ BOOST_AUTO_TEST_CASE( makeChange )
 {
   cout << "=== makeChange ===" << endl;
   
-  LogoBuiltinWord builtins[] = {
-    { "WAIT", &wait, 1 },
- };
-
+  LogoBuiltinWord empty[] = {};
   NullTimeProvider time;
-  Logo logo(builtins, sizeof(builtins), &time, Logo::core);
+  Logo logo(empty, 0, &time, Logo::core);
 
   logo.compile("MAKE \"num 100");
   logo.compile("MAKE \"num 200");
@@ -118,7 +98,6 @@ BOOST_AUTO_TEST_CASE( forever )
   LogoBuiltinWord builtins[] = {
     { "ON", &ledOn },
     { "OFF", &ledOff },
-    { "WAIT", &wait, 1 },
   };
 
   NullTimeProvider time;
@@ -149,7 +128,6 @@ BOOST_AUTO_TEST_CASE( repeat )
   LogoBuiltinWord builtins[] = {
     { "ON", &ledOn },
     { "OFF", &ledOff },
-    { "WAIT", &wait, 1 },
   };
 
   NullTimeProvider time;
@@ -473,47 +451,47 @@ private:
   short _scheduled;
   
 };
-// 
-// BOOST_AUTO_TEST_CASE( waitWordFired )
-// {
-//   cout << "=== waitWordFired ===" << endl;
-//   
-//   LogoBuiltinWord builtins[] = {
-//     { "ON", &ledOn },
-//   };
-// 
-//   TestTimeProvider time;
-//   Logo logo(builtins, sizeof(builtins), &time, Logo::core);
-//  
-//   logo.compile("WAIT 1000 ON");
-//   BOOST_CHECK_EQUAL(logo.geterr(), 0);
-//   DEBUG_DUMP(false);
-// 
-//   time.settime(1500);
-//   
-//   DEBUG_STEP_DUMP(10, false);
-//   BOOST_CHECK_EQUAL(logo.run(), 0);
-//   BOOST_CHECK(time.fired());
-// 
-// }
-// 
-// BOOST_AUTO_TEST_CASE( waitWordNotReady )
-// {
-//   cout << "=== waitWordNotReady ===" << endl;
-//   
-//   LogoBuiltinWord builtins[] = {
-//     { "ON", &ledOn },
-//   };
-// 
-//   TestTimeProvider time;
-//   Logo logo(builtins, sizeof(builtins), &time, Logo::core);
-//  
-//   logo.compile("WAIT 1000 ON");
-//   BOOST_CHECK_EQUAL(logo.geterr(), 0);
-//   DEBUG_DUMP(false);
-// 
-//   DEBUG_STEP_DUMP(10, false);
-//   BOOST_CHECK_EQUAL(logo.run(), 0);
-//   BOOST_CHECK(!time.fired());
-// 
-// }
+
+BOOST_AUTO_TEST_CASE( waitWordFired )
+{
+  cout << "=== waitWordFired ===" << endl;
+  
+  LogoBuiltinWord builtins[] = {
+    { "ON", &ledOn },
+  };
+
+  TestTimeProvider time;
+  Logo logo(builtins, sizeof(builtins), &time, Logo::core);
+ 
+  logo.compile("WAIT 1000 ON");
+  BOOST_CHECK_EQUAL(logo.geterr(), 0);
+  DEBUG_DUMP(false);
+
+  time.settime(1500);
+  
+  DEBUG_STEP_DUMP(10, false);
+  BOOST_CHECK_EQUAL(logo.run(), 0);
+  BOOST_CHECK(time.fired());
+
+}
+
+BOOST_AUTO_TEST_CASE( waitWordNotReady )
+{
+  cout << "=== waitWordNotReady ===" << endl;
+  
+  LogoBuiltinWord builtins[] = {
+    { "ON", &ledOn },
+  };
+
+  TestTimeProvider time;
+  Logo logo(builtins, sizeof(builtins), &time, Logo::core);
+ 
+  logo.compile("WAIT 1000 ON");
+  BOOST_CHECK_EQUAL(logo.geterr(), 0);
+  DEBUG_DUMP(false);
+
+  DEBUG_STEP_DUMP(10, false);
+  BOOST_CHECK_EQUAL(logo.run(), 0);
+  BOOST_CHECK(!time.fired());
+
+}

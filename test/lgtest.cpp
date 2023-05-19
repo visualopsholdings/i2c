@@ -28,6 +28,8 @@ vector<string> gCmds;
 
 //#define PRINT_RESULT
 
+#include "nulltimeprovider.hpp"
+
 void ledOn(Logo &logo) {
   gCmds.push_back("LED ON");
 #ifdef PRINT_RESULT
@@ -50,16 +52,6 @@ void wait(Logo &logo) {
   cout << gCmds.back() << endl;
 #endif
 }
-
-class NullTimeProvider: public LogoTimeProvider {
-
-public:
-  
-  // LogoTimeProvider
-  virtual void schedule(short ms) {}
-  virtual bool next() { return true; }
-  
-};
 
 BOOST_AUTO_TEST_CASE( builtin )
 {

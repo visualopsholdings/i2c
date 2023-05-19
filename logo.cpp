@@ -47,7 +47,7 @@ LogoBuiltinWord Logo::core[] = {
 #endif
   { "=", LogoWords::eq, LogoWords::eqArity },
 // more testing needed
-//  { "WAIT", LogoWords::wait, LogoWords::waitArity },
+  { "WAIT", LogoWords::wait, LogoWords::waitArity },
 };
 
 Logo::Logo(LogoBuiltinWord *builtins, short size, LogoTimeProvider *time, LogoBuiltinWord *core) : 
@@ -490,6 +490,11 @@ short Logo::step() {
     return err;
   }
   
+  // just in case arity ACTUALLY called a builtin.
+  if (!_time->next()) {
+    return 0;
+  }
+
   // make sure stack ops don't make it onto here.
   if (_code[_pc]._optype >= SOP_START) {
     return LG_UNHANDLED_OP_TYPE;
@@ -1289,7 +1294,7 @@ void Logo::entab(short indent) const {
 void Logo::printword(const LogoWord &word) const {
   char name[32];
   getstring(name, sizeof(name), word._name, word._namelen);
-  cout  << name << " (" << _jump << ")";
+  cout  << name << " (" << (short)word._jump << ")";
 }
 
 void Logo::dump(short indent, short type, short op, short opand) const {

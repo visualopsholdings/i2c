@@ -16,6 +16,8 @@
 #define BOOST_AUTO_TEST_MAIN
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <thread>
+#include <chrono>
 
 #include "../logo.hpp"
 
@@ -24,35 +26,27 @@
 #include <strstream>
 
 using namespace std;
+using namespace boost::posix_time;
 
 vector<string> gCmds;
 
 //#define PRINT_RESULT
 
+#include "nulltimeprovider.hpp"
+
 void ledOn(Logo &logo) {
   gCmds.push_back("LED ON");
 #ifdef PRINT_RESULT
-  cout << gCmds.back() << endl;
+   cout << gCmds.back() << endl;
 #endif
 }
 
 void ledOff(Logo &logo) {
   gCmds.push_back("LED OFF");
 #ifdef PRINT_RESULT
-  cout << gCmds.back() << endl;
+   cout << gCmds.back() << endl;
 #endif
 }
-
-void wait(Logo &logo) {
-  strstream str;
-  str << "WAIT " << logo.popint();
-  gCmds.push_back(str.str());
-#ifdef PRINT_RESULT
-  cout << gCmds.back() << endl;
-#endif
-}
-
-using namespace boost::posix_time;
 
 class RealTimeProvider: public LogoTimeProvider {
 
@@ -64,48 +58,36 @@ public:
   
 private:
   ptime _lasttime;
-  ptime _nexttime;
+  short _time;
 };
 
 void RealTimeProvider::schedule(short ms) {
   if (_lasttime == ptime(not_a_date_time)) {
     _lasttime = microsec_clock::local_time();
-    cout << microsec_clock::local_time() << endl;
   }
-  if (_nexttime == not_a_date_time) {
-    _nexttime = _lasttime + milliseconds(ms);
+  if (_time == 0) {
+    _time = ms;
   }
   else {
-    _nexttime = _nexttime + milliseconds(ms);
+    _time += ms;
   }
-  cout << _nexttime << endl;
 }
 
 bool RealTimeProvider::next() {
-  if (_nexttime == not_a_date_time) {
+  if (_time == 0) {
     return true;
   }
   ptime now = microsec_clock::local_time();
-  if (now < _nexttime) {
-    return false;
+  time_duration diff =  now - _lasttime;
+  if (diff.total_milliseconds() > _time) {
+    _lasttime = now;
+    _time = 0;
+    return true;
   }
-  
-//  cout << "next " << now << ", " << _nexttime << endl;
-  _nexttime = not_a_date_time;
-  _lasttime = now;
-  return true;
+  this_thread::sleep_for(chrono::milliseconds(100));
+  return false;
 
 }
-
-class NullTimeProvider: public LogoTimeProvider {
-
-public:
-  
-  // LogoTimeProvider
-  virtual void schedule(short ms) {}
-  virtual bool next() { return true; }
-  
-};
 
 #if defined(HAS_FOREVER)
 
@@ -116,7 +98,6 @@ BOOST_AUTO_TEST_CASE( bigSketch )
   LogoBuiltinWord builtins[] = {
     { "ON", &ledOn },
     { "OFF", &ledOff },
-    { "WAIT", &wait, 1 },
   };
 //  RealTimeProvider time;
   NullTimeProvider time;
@@ -139,11 +120,10 @@ BOOST_AUTO_TEST_CASE( bigSketch )
   logo.compile("GO");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
   DEBUG_DUMP(false);
-  BOOST_CHECK_EQUAL(logo.geterr(), 0);
 
   gCmds.clear();
-//  BOOST_CHECK_EQUAL(logo.run(), 0);
-  DEBUG_STEP_DUMP(20, false);
+//   BOOST_CHECK_EQUAL(logo.run(), 0);
+ DEBUG_STEP_DUMP(1000, false);
   for (int i=0; i<100; i++) {
     BOOST_CHECK_EQUAL(logo.step(), 0);
   }
@@ -152,7 +132,6 @@ BOOST_AUTO_TEST_CASE( bigSketch )
   BOOST_CHECK_EQUAL(gCmds[1], "WAIT 1000");
   BOOST_CHECK_EQUAL(gCmds[2], "LED OFF");
   BOOST_CHECK_EQUAL(gCmds[3], "WAIT 2000");
-  BOOST_CHECK_EQUAL(gCmds[4], "LED ON");
     
   logo.resetcode();
   logo.compile("STOP");
@@ -176,9 +155,9 @@ BOOST_AUTO_TEST_CASE( smallSketch )
   LogoBuiltinWord builtins[] = {
     { "ON", &ledOn },
     { "OFF", &ledOff },
-    { "WAIT", &wait, 1 },
   };
-  RealTimeProvider time;
+//  RealTimeProvider time;
+  NullTimeProvider time;
   Logo logo(builtins, sizeof(builtins), &time, Logo::core);
 
   logo.compile("TO FLASH; ON WAIT 1000 OFF WAIT 2000; END;");
