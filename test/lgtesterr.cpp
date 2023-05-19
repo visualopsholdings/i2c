@@ -28,15 +28,12 @@ vector<string> gCmds;
 
 //#define PRINT_RESULT
 
-#include "nulltimeprovider.hpp"
-
 BOOST_AUTO_TEST_CASE( unknownWord )
 {
   cout << "=== unknownWord ===" << endl;
   
   LogoBuiltinWord empty[] = {};
-  NullTimeProvider time;
-  Logo logo(empty, 0, &time);
+  Logo logo(empty, 0, 0);
 
   logo.compile("XXXX");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
@@ -49,8 +46,7 @@ BOOST_AUTO_TEST_CASE( unknownWordInWord )
   cout << "=== unknownWordInWord ===" << endl;
   
   LogoBuiltinWord empty[] = {};
-  NullTimeProvider time;
-  Logo logo(empty, 0, &time);
+  Logo logo(empty, 0, 0);
 
   logo.compile("TO TEST; ON; END;");
   DEBUG_DUMP(false);
@@ -63,8 +59,7 @@ BOOST_AUTO_TEST_CASE( tooManyWords )
   cout << "=== tooManyWords ===" << endl;
   
   LogoBuiltinWord empty[] = {};
-  NullTimeProvider time;
-  Logo logo(empty, 0, &time);
+  Logo logo(empty, 0, 0);
 
   for (short i=1; i<MAX_WORDS+2; i++) {
     strstream str;
@@ -80,8 +75,7 @@ BOOST_AUTO_TEST_CASE( outOfStrings )
   cout << "=== outOfStrings ===" << endl;
   
   LogoBuiltinWord empty[] = {};
-  NullTimeProvider time;
-  Logo logo(empty, 0, &time);
+  Logo logo(empty, 0, 0);
   
   short segn = 16;
   short seg = STRING_POOL_SIZE/segn;
@@ -105,8 +99,7 @@ BOOST_AUTO_TEST_CASE( lineTooLong )
   cout << "=== lineTooLong ===" << endl;
   
   LogoBuiltinWord empty[] = {};
-  NullTimeProvider time;
-  Logo logo(empty, 0, &time);
+  Logo logo(empty, 0, 0);
   
   strstream str;
   for (short i=0; i<20; i++) {
@@ -129,8 +122,7 @@ BOOST_AUTO_TEST_CASE( wordTooLong )
   cout << "=== wordTooLong ===" << endl;
   
   LogoBuiltinWord empty[] = {};
-  NullTimeProvider time;
-  Logo logo(empty, 0, &time);
+  Logo logo(empty, 0, 0);
   
   strstream str;
   for (short i=0; i<WORD_LEN+1; i++) {
@@ -149,8 +141,7 @@ BOOST_AUTO_TEST_CASE( outOfCode )
   cout << "=== outOfCode ===" << endl;
   
   LogoBuiltinWord empty[] = {};
-  NullTimeProvider time;
-  Logo logo(empty, 0, &time);
+  Logo logo(empty, 0, 0);
   
   strstream str;
   for (short i=0; i<MAX_CODE+2; i++) {
@@ -175,8 +166,7 @@ BOOST_AUTO_TEST_CASE( stackOverflow )
   LogoBuiltinWord builtins[] = {
     { "NEVER", &nevercalled, MAX_STACK+2 }
   };
-  NullTimeProvider time;
-  Logo logo(builtins, sizeof(builtins), &time);
+  Logo logo(builtins, sizeof(builtins), 0);
   
   strstream str;
   str << "TO LOTS; ";
@@ -203,8 +193,7 @@ BOOST_AUTO_TEST_CASE( tooManyVariables )
   cout << "=== tooManyVariables ===" << endl;
   
   LogoBuiltinWord empty[] = {};
-  NullTimeProvider time;
-  Logo logo(empty, 0, &time, Logo::core);
+  Logo logo(empty, 0, 0, Logo::core);
 
   for (short i=1; i<MAX_VARS+2; i++) {
     strstream str;
@@ -239,8 +228,7 @@ BOOST_AUTO_TEST_CASE( notString )
   LogoBuiltinWord builtins[] = {
     { "WANTSSTRING", &wantsstring, 0 }
   };
-  NullTimeProvider time;
-  Logo logo(builtins, sizeof(builtins), &time);
+  Logo logo(builtins, sizeof(builtins), 0);
   
   logo.compile("WANTSSTRING 1");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);

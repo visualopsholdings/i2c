@@ -234,9 +234,25 @@ class LogoTimeProvider {
 
 public:
 
-  virtual void schedule(short ms) = 0;
-  virtual bool next() = 0;
+  virtual unsigned long currentms() = 0;
+  virtual void delay(unsigned long ms) = 0;
+  virtual bool testing(short ms) = 0;
+
+};
+
+class LogoScheduler {
+
+public:
+  LogoScheduler(LogoTimeProvider *provider): _provider(provider), _lasttime(0), _time(0) {}
+
+  virtual void schedule(short ms);
+  virtual bool next() ;
     
+private:
+  LogoTimeProvider *_provider;
+  unsigned long _lasttime;
+  short _time;
+
 };
 
 class Logo {
@@ -262,7 +278,7 @@ public:
   void resetcode(); // reset all the code, leaves the words and restarrs
   void fail(short err);
   void schedulenext(short delay) { 
-    _time->schedule(delay); 
+    _schedule.schedule(delay); 
   }
   
   // dealing with the stack
@@ -364,7 +380,7 @@ private:
   void dosentences(char *buf, short len, const char *start);
 #endif
   
-  LogoTimeProvider *_time;
+  LogoScheduler _schedule;
   
   // parser
   bool dodefine(const char *word);

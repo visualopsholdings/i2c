@@ -56,7 +56,7 @@ Logo::Logo(LogoBuiltinWord *builtins, short size, LogoTimeProvider *time, LogoBu
   _builtins(builtins), 
   _core(core), 
   _nextstring(0), _wordcount(0), 
-  _pc(0), _tos(0) {
+  _pc(0), _tos(0), _schedule(time) {
   
 #ifdef HAS_VARIABLES
   _varcount = 0;
@@ -71,8 +71,6 @@ Logo::Logo(LogoBuiltinWord *builtins, short size, LogoTimeProvider *time, LogoBu
   _startjcode = _nextjcode = MAX_CODE/2;
 
   reset();
-
-  _time = time;
     
 }
 
@@ -481,7 +479,7 @@ short Logo::step() {
 
 //  DEBUG_IN(Logo, "step");
   
-  if (!_time->next()) {
+  if (!_schedule.next()) {
     return 0;
   }
 
@@ -491,7 +489,7 @@ short Logo::step() {
   }
   
   // just in case arity ACTUALLY called a builtin.
-  if (!_time->next()) {
+  if (!_schedule.next()) {
     return 0;
   }
 
@@ -1283,6 +1281,40 @@ void Logo::defineintvar(char *s, short i) {
     
 }
 #endif
+
+void LogoScheduler::schedule(short ms) {
+  if (!_provider) {
+    return;
+  }
+  if (_provider->testing(ms)) {
+    return;
+  }
+  if (_lasttime == 0) {
+    _lasttime = _provider->currentms();
+  }
+  if (_time == 0) {
+    _time = ms;
+  }
+  else {
+    _time += ms;
+  }
+}
+
+bool LogoScheduler::next() {
+  if (!_provider || _time == 0) {
+    return true;
+  }
+  unsigned long now = _provider->currentms();
+  unsigned long diff = now - _lasttime;
+  if (diff > _time) {
+    _lasttime = now;
+    _time = 0;
+    return true;
+  }
+  _provider->delay(100);
+  return false;
+
+}
 
 #ifdef LOGO_DEBUG
 void Logo::entab(short indent) const {

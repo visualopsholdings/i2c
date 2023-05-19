@@ -80,46 +80,24 @@ LogoBuiltinWord builtins[] = {
 };
 // not currently working.
 // class ArduinoTimeProvider: public LogoTimeProvider {
-// 
+
 // public:
-//   ArduinoTimeProvider() : _lasttime(0), _nexttime(0) {}
-// 
+
 //   // LogoTimeProvider
-//   virtual void schedule(short ms);
-//   virtual bool next();
-//   
-// private:
-//   unsigned long _lasttime;
-//   unsigned long _nexttime;
+//   virtual unsigned long currentms();
+//   virtual void delay(unsigned long ms);
+//   virtual bool testing(short ms) { return false; };
+
 // };
-// void ArduinoTimeProvider::schedule(short ms) {
-//   if (_lasttime == 0) {
-//     _lasttime = millis();
-//   }
-//   _nexttime = _lasttime + ms;
+// unsigned long ArduinoTimeProvider::currentms() {
+//   return millis();
 // }
-// bool ArduinoTimeProvider::next() {
-//   return true;
-//   unsigned long now = millis();
-//   if (now >= _nexttime) {
-//     _nexttime = 0;
-//     return true;
-//   }
-//   delay(20);
-//   return false;
+// void ArduinoTimeProvider::delay(unsigned long ms) {
+//   delay(ms);
 // }
 // ArduinoTimeProvider time;
-class NullTimeProvider: public LogoTimeProvider {
-
-public:
-  
-  // LogoTimeProvider
-  virtual void schedule(short ms) {}
-  virtual bool next() { return true; }
-  
-};
-NullTimeProvider time;
-Logo logo(builtins, sizeof(builtins), &time, Logo::core);
+// Logo logo(builtins, sizeof(builtins), &time, Logo::core);
+Logo logo(builtins, sizeof(builtins), 0, Logo::core);
 #endif
 
 void flashErr(int mode, int n) {

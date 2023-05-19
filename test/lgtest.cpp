@@ -28,8 +28,6 @@ vector<string> gCmds;
 
 //#define PRINT_RESULT
 
-#include "nulltimeprovider.hpp"
-
 void ledOn(Logo &logo) {
   gCmds.push_back("LED ON");
 #ifdef PRINT_RESULT
@@ -60,8 +58,7 @@ BOOST_AUTO_TEST_CASE( builtin )
   LogoBuiltinWord builtins[] = {
     { "ON", &ledOn }
   };
-  NullTimeProvider time;
-  Logo logo(builtins, sizeof(builtins), &time);
+  Logo logo(builtins, sizeof(builtins), 0);
 
   logo.compile("ON");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
@@ -82,8 +79,7 @@ BOOST_AUTO_TEST_CASE( defineSimpleWord )
     { "ON", &ledOn },
     { "OFF", &ledOff }
   };
-  NullTimeProvider time;
-  Logo logo(builtins, sizeof(builtins), &time);
+  Logo logo(builtins, sizeof(builtins), 0);
 
   logo.compile("TO TURNON; ON; END;");
   logo.compile("TURNON;");
@@ -115,8 +111,7 @@ BOOST_AUTO_TEST_CASE( compound )
     { "OFF", &ledOff },
     { "WAIT", &wait, 1 }
   };
-  NullTimeProvider time;
-  Logo logo(builtins, sizeof(builtins), &time);
+  Logo logo(builtins, sizeof(builtins), 0);
 
   logo.compile("ON WAIT 100 OFF WAIT 20");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
@@ -141,8 +136,7 @@ BOOST_AUTO_TEST_CASE( defineCompoundWord )
     { "OFF", &ledOff },
     { "WAIT", &wait, 1 }
   };
-  NullTimeProvider time;
-  Logo logo(builtins, sizeof(builtins), &time);
+  Logo logo(builtins, sizeof(builtins), 0);
 
   logo.compile("TO TEST1; ON WAIT 100 OFF WAIT 20; END;");
   logo.compile("TO TEST2; OFF WAIT 30 ON WAIT 40; END;");
@@ -173,8 +167,7 @@ BOOST_AUTO_TEST_CASE( nestedWord )
     { "OFF", &ledOff },
     { "WAIT", &wait, 1 }
   };
-  NullTimeProvider time;
-  Logo logo(builtins, sizeof(builtins), &time);
+  Logo logo(builtins, sizeof(builtins), 0);
 
   logo.compile("TO TEST1; ON WAIT 100 OFF WAIT 20; END;");
   logo.compile("TO TEST2; TEST1; END;");
@@ -201,8 +194,7 @@ BOOST_AUTO_TEST_CASE( defineCompoundWordRun1 )
     { "OFF", &ledOff },
     { "WAIT", &wait, 1 }
   };
-  NullTimeProvider time;
-  Logo logo(builtins, sizeof(builtins), &time);
+  Logo logo(builtins, sizeof(builtins), 0);
 
   logo.compile("TO TEST1; ON WAIT 10 OFF WAIT 20; END;");
   logo.compile("TO TEST2; OFF WAIT 30 ON WAIT 40; END;");
@@ -225,8 +217,7 @@ BOOST_AUTO_TEST_CASE( defineEmptyWord )
   cout << "=== defineEmptyWord ===" << endl;
   
   LogoBuiltinWord empty[] = {};
-  NullTimeProvider time;
-  Logo logo(empty, 0, &time);
+  Logo logo(empty, 0, 0);
 
   logo.compile("TO TEST1; END;");
   logo.compile("TEST1");
@@ -250,8 +241,7 @@ BOOST_AUTO_TEST_CASE( sentence )
     { "OFF", &ledOff },
     { "WAIT", &wait, 1 }
   };
-  NullTimeProvider time;
-  Logo logo(builtins, sizeof(builtins), &time);
+  Logo logo(builtins, sizeof(builtins), 0);
 
   logo.compile("[ON WAIT 10 OFF WAIT 20];");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
@@ -276,8 +266,7 @@ BOOST_AUTO_TEST_CASE( sentences )
     { "OFF", &ledOff },
     { "WAIT", &wait, 1 }
   };
-  NullTimeProvider time;
-  Logo logo(builtins, sizeof(builtins), &time);
+  Logo logo(builtins, sizeof(builtins), 0);
 
   logo.compile("[ON] [WAIT 10] [OFF] [WAIT 20];");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
@@ -317,8 +306,7 @@ BOOST_AUTO_TEST_CASE( sentenceInWord )
   LogoBuiltinWord builtins[] = {
     { "SARG", &sarg, 1 }
   };
-  NullTimeProvider time;
-  Logo logo(builtins, sizeof(builtins), &time);
+  Logo logo(builtins, sizeof(builtins), 0);
 
   logo.compile("TO TEST; SARG [XXX]; END;");
   logo.compile("TEST;");
@@ -342,8 +330,7 @@ BOOST_AUTO_TEST_CASE( arityLiteral1 )
   LogoBuiltinWord builtins[] = {
     { "WAIT", &wait, 1 }
   };
-  NullTimeProvider time;
-  Logo logo(builtins, sizeof(builtins), &time);
+  Logo logo(builtins, sizeof(builtins), 0);
 
   logo.compile("WAIT 20");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
@@ -363,8 +350,7 @@ BOOST_AUTO_TEST_CASE( arityWord1 )
   LogoBuiltinWord builtins[] = {
     { "WAIT", &wait, 1 }
   };
-  NullTimeProvider time;
-  Logo logo(builtins, sizeof(builtins), &time);
+  Logo logo(builtins, sizeof(builtins), 0);
 
   logo.compile("TO TIME; 20; END");
   logo.compile("WAIT TIME");
@@ -398,8 +384,7 @@ BOOST_AUTO_TEST_CASE( arityLiteral )
   LogoBuiltinWord builtins[] = {
     { "ARGS2", &args2, 2 }
   };
-  NullTimeProvider time;
-  Logo logo(builtins, sizeof(builtins), &time);
+  Logo logo(builtins, sizeof(builtins), 0);
 
   logo.compile("ARGS2 20 XXXX");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
@@ -420,8 +405,7 @@ BOOST_AUTO_TEST_CASE( arityWord )
   LogoBuiltinWord builtins[] = {
     { "ARGS2", &args2, 2 }
   };
-  NullTimeProvider time;
-  Logo logo(builtins, sizeof(builtins), &time);
+  Logo logo(builtins, sizeof(builtins), 0);
 
   logo.compile("TO TIME; 20; END");
   logo.compile("TO THING; XXXX; END");
@@ -446,8 +430,7 @@ BOOST_AUTO_TEST_CASE( seperateLines )
   LogoBuiltinWord builtins[] = {
     { "SARG", &sarg, 1 }
   };
-  NullTimeProvider time;
-  Logo logo(builtins, sizeof(builtins), &time);
+  Logo logo(builtins, sizeof(builtins), 0);
 
   logo.compile("TO TEST");
   logo.compile("  SARG [XXX]");
@@ -470,8 +453,7 @@ BOOST_AUTO_TEST_CASE( newLines )
   LogoBuiltinWord builtins[] = {
     { "SARG", &sarg, 1 }
   };
-  NullTimeProvider time;
-  Logo logo(builtins, sizeof(builtins), &time);
+  Logo logo(builtins, sizeof(builtins), 0);
 
   logo.compile("TO TEST\n\tSARG [XXX]\nEND\nTEST");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
@@ -491,8 +473,7 @@ BOOST_AUTO_TEST_CASE( reset )
   LogoBuiltinWord builtins[] = {
     { "SARG", &sarg, 1 }
   };
-  NullTimeProvider time;
-  Logo logo(builtins, sizeof(builtins), &time);
+  Logo logo(builtins, sizeof(builtins), 0);
 
   logo.compile("TO TEST\n\tSARG [XXX]\nEND\nTEST");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
@@ -531,8 +512,7 @@ BOOST_AUTO_TEST_CASE( infix )
   LogoBuiltinWord builtins[] = {
     { "INFIX", &infixfn, 1 },
   };
-  NullTimeProvider time;
-  Logo logo(builtins, sizeof(builtins), &time);
+  Logo logo(builtins, sizeof(builtins), 0);
 
   logo.compile("1 INFIX 5");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
@@ -550,10 +530,8 @@ BOOST_AUTO_TEST_CASE( literalsOnStack )
 {
   cout << "=== literalsOnStack ===" << endl;
   
-  LogoBuiltinWord builtins[] = {
-  };
-  NullTimeProvider time;
-  Logo logo(builtins, sizeof(builtins), &time);
+  LogoBuiltinWord empty[] = {};
+  Logo logo(empty, 0, 0);
 
   logo.compile("TO NUM; 1 2 3; END; NUM");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);

@@ -32,7 +32,7 @@ vector<string> gCmds;
 
 //#define PRINT_RESULT
 
-#include "nulltimeprovider.hpp"
+#include "testtimeprovider.hpp"
 
 void ledOn(Logo &logo) {
   gCmds.push_back("LED ON");
@@ -52,42 +52,19 @@ class RealTimeProvider: public LogoTimeProvider {
 
 public:
 
-  // LogoTimeProvider
-  virtual void schedule(short ms);
-  virtual bool next();
+  unsigned long currentms() {
+    std::time_t t = 1118158776;
+    ptime first = from_time_t(t);
+    ptime nowt = microsec_clock::local_time();
+    time_duration start = nowt - first;
+    return start.total_milliseconds();
+  }
+  void delay(unsigned long ms) {
+    this_thread::sleep_for(chrono::milliseconds(ms));
+  }
+  bool testing(short ms) { return false; };
   
-private:
-  ptime _lasttime;
-  short _time;
 };
-
-void RealTimeProvider::schedule(short ms) {
-  if (_lasttime == ptime(not_a_date_time)) {
-    _lasttime = microsec_clock::local_time();
-  }
-  if (_time == 0) {
-    _time = ms;
-  }
-  else {
-    _time += ms;
-  }
-}
-
-bool RealTimeProvider::next() {
-  if (_time == 0) {
-    return true;
-  }
-  ptime now = microsec_clock::local_time();
-  time_duration diff =  now - _lasttime;
-  if (diff.total_milliseconds() > _time) {
-    _lasttime = now;
-    _time = 0;
-    return true;
-  }
-  this_thread::sleep_for(chrono::milliseconds(100));
-  return false;
-
-}
 
 #if defined(HAS_FOREVER)
 
@@ -100,7 +77,7 @@ BOOST_AUTO_TEST_CASE( bigSketch )
     { "OFF", &ledOff },
   };
 //  RealTimeProvider time;
-  NullTimeProvider time;
+  TestTimeProvider time;
   Logo logo(builtins, sizeof(builtins), &time, Logo::core);
 
   logo.compile("TO FLASH; ON WAIT 1000 OFF WAIT 2000; END;");
@@ -123,7 +100,7 @@ BOOST_AUTO_TEST_CASE( bigSketch )
 
   gCmds.clear();
 //   BOOST_CHECK_EQUAL(logo.run(), 0);
- DEBUG_STEP_DUMP(1000, false);
+  DEBUG_STEP_DUMP(1000, false);
   for (int i=0; i<100; i++) {
     BOOST_CHECK_EQUAL(logo.step(), 0);
   }
@@ -157,7 +134,7 @@ BOOST_AUTO_TEST_CASE( smallSketch )
     { "OFF", &ledOff },
   };
 //  RealTimeProvider time;
-  NullTimeProvider time;
+  TestTimeProvider time;
   Logo logo(builtins, sizeof(builtins), &time, Logo::core);
 
   logo.compile("TO FLASH; ON WAIT 1000 OFF WAIT 2000; END;");
