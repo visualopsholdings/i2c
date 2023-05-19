@@ -31,6 +31,7 @@ using namespace boost::posix_time;
 vector<string> gCmds;
 
 //#define PRINT_RESULT
+//#define REAL_TIME
 
 #include "testtimeprovider.hpp"
 
@@ -48,6 +49,7 @@ void ledOff(Logo &logo) {
 #endif
 }
 
+#ifdef REAL_TIME
 class RealTimeProvider: public LogoTimeProvider {
 
 public:
@@ -65,6 +67,7 @@ public:
   bool testing(short ms) { return false; };
   
 };
+#endif
 
 #if defined(HAS_FOREVER)
 
@@ -76,8 +79,11 @@ BOOST_AUTO_TEST_CASE( bigSketch )
     { "ON", &ledOn },
     { "OFF", &ledOff },
   };
-//  RealTimeProvider time;
+#ifdef REAL_TIME
+  RealTimeProvider time;
+#else
   TestTimeProvider time;
+#endif
   Logo logo(builtins, sizeof(builtins), &time, Logo::core);
 
   logo.compile("TO FLASH; ON WAIT 1000 OFF WAIT 2000; END;");
@@ -133,8 +139,11 @@ BOOST_AUTO_TEST_CASE( smallSketch )
     { "ON", &ledOn },
     { "OFF", &ledOff },
   };
-//  RealTimeProvider time;
+#ifdef REAL_TIME
+  RealTimeProvider time;
+#else
   TestTimeProvider time;
+#endif
   Logo logo(builtins, sizeof(builtins), &time, Logo::core);
 
   logo.compile("TO FLASH; ON WAIT 1000 OFF WAIT 2000; END;");
