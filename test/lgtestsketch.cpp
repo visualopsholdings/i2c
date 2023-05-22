@@ -61,10 +61,13 @@ public:
     time_duration start = nowt - first;
     return start.total_milliseconds();
   }
-  void delay(unsigned long ms) {
+  void delayms(unsigned long ms) {
     this_thread::sleep_for(chrono::milliseconds(ms));
   }
-  bool testing(short ms) { return false; };
+  bool testing(short ms) { 
+    cout << "WAIT " << ms << endl;
+    return false; 
+  };
   
 };
 #endif
@@ -105,7 +108,9 @@ BOOST_AUTO_TEST_CASE( bigSketch )
   DEBUG_DUMP(false);
 
   gCmds.clear();
-//   BOOST_CHECK_EQUAL(logo.run(), 0);
+#ifdef REAL_TIME
+   BOOST_CHECK_EQUAL(logo.run(), 0);
+#else
   DEBUG_STEP_DUMP(1000, false);
   for (int i=0; i<100; i++) {
     BOOST_CHECK_EQUAL(logo.step(), 0);
@@ -126,6 +131,7 @@ BOOST_AUTO_TEST_CASE( bigSketch )
     BOOST_CHECK_EQUAL(logo.step(), 0);
   }
   BOOST_CHECK_EQUAL(gCmds.size(), 0);
+#endif
   
 }
 

@@ -425,7 +425,7 @@ public:
   unsigned long currentms() {
     return _time;
   }
-  void delay(unsigned long ms) {
+  void delayms(unsigned long ms) {
     _time += ms;
   }
   bool testing(short ms) {

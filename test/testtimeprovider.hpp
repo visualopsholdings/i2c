@@ -16,7 +16,7 @@ public:
   unsigned long currentms() {
     return 0;
   }
-  void delay(unsigned long ms) {
+  void delayms(unsigned long ms) {
   }
   bool testing(short ms) {
     strstream str;

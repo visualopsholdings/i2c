@@ -14,14 +14,20 @@
 #include "logo.hpp"
 
 #ifdef LOGO_DEBUG
+#ifdef ARDUINO
+#include "arduinodebug.hpp"
+#else
 #include "test/debug.hpp"
 void Logo::outstate() const {
 //  cout << " _inword " << _inword << endl;
 //  cout << " _pc " << _pc << endl;
   cout << endl;
 }
+#endif // ARDUINO
+#define DELAY_TIME  500
 #else
 #include "nodebug.hpp"
+#define DELAY_TIME  20
 #endif
 
 #include <stdlib.h>
@@ -46,7 +52,6 @@ LogoBuiltinWord Logo::core[] = {
   { "IFELSE", LogoWords::ifelse, LogoWords::ifelseArity },
 #endif
   { "=", LogoWords::eq, LogoWords::eqArity },
-// more testing needed
   { "WAIT", LogoWords::wait, LogoWords::waitArity },
 };
 
@@ -475,6 +480,10 @@ bool Logo::call(const LogoWord &word) {
   
 }
 
+void Logo::schedulenext(short delay) {
+  _schedule.schedule(delay); 
+}
+
 short Logo::step() {
 
 //  DEBUG_IN(Logo, "step");
@@ -482,7 +491,6 @@ short Logo::step() {
   if (!_schedule.next()) {
     return 0;
   }
-
   short err = doarity();
   if (err) {
     return err;
@@ -1301,7 +1309,11 @@ void LogoScheduler::schedule(short ms) {
 }
 
 bool LogoScheduler::next() {
-  if (!_provider || _time == 0) {
+  if (!_provider) {
+    return true;
+  }
+  if (_time == 0) {
+    _provider->delayms(DELAY_TIME);
     return true;
   }
   unsigned long now = _provider->currentms();
@@ -1311,12 +1323,13 @@ bool LogoScheduler::next() {
     _time = 0;
     return true;
   }
-  _provider->delay(100);
+  _provider->delayms(DELAY_TIME);
   return false;
 
 }
 
-#ifdef LOGO_DEBUG
+#if defined(LOGO_DEBUG) && !defined(ARDUINO)
+
 void Logo::entab(short indent) const {
   for (short i=0; i<indent; i++) {
     cout << "\t";

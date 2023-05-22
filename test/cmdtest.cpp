@@ -160,6 +160,35 @@ BOOST_AUTO_TEST_CASE( tab )
 
 }
 
+BOOST_AUTO_TEST_CASE( byteByByte )
+{
+  cout << "=== byteByByte ===" << endl;
+  
+  RingBuffer buffer;
+  Cmd cmd;
+
+  buffer.write(79);
+  cmd.accept(&buffer);
+  BOOST_CHECK(!cmd.ready());
+
+  buffer.write(78);
+  cmd.accept(&buffer);
+  BOOST_CHECK(!cmd.ready());
+
+  buffer.write(10);
+  cmd.accept(&buffer);
+  BOOST_CHECK(cmd.ready());
+  
+  char c[20];
+  cmd.read(c, sizeof(c));
+  BOOST_CHECK_EQUAL(c, "ON");
+
+}
+
+
+
+
+
 
 
 

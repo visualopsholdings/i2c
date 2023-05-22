@@ -153,11 +153,11 @@ BOOST_AUTO_TEST_CASE( outOfCode )
   
 }
 
+#ifdef HAS_SENTENCES
+
 void nevercalled(Logo &logo) {
   BOOST_FAIL( "was called!" );
 }
-
-#ifdef HAS_SENTENCES
 
 BOOST_AUTO_TEST_CASE( stackOverflow )
 {
@@ -170,12 +170,12 @@ BOOST_AUTO_TEST_CASE( stackOverflow )
   
   strstream str;
   str << "TO LOTS; ";
-  for (short i=0; i<10; i++) {
+  for (short i=0; i<8; i++) {
     str << "A ";
   }
   str << "; END;";
   logo.compile(str.str());
-  logo.compile("NEVER [LOTS LOTS LOTS LOTS LOTS LOTS LOTS]");
+  logo.compile("NEVER [LOTS LOTS LOTS LOTS LOTS LOTS]");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
   DEBUG_DUMP(false);
 

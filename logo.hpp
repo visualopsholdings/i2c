@@ -84,14 +84,26 @@
 #define HAS_SENTENCES
 
 // about 14.5k with all code, 9.6k bare bones with everything off.
-#define STRING_POOL_SIZE  256       // these number of bytes
-#define LINE_LEN          64        // these number of bytes
-#define WORD_LEN          32        // these number of bytes
-#define MAX_WORDS         20        // 3 bytes each
-#define MAX_CODE          100       // 6 bytes each
-#define MAX_STACK         40        // 6 bytes each
+#define STRING_POOL_SIZE  128       // these number of bytes
+#define LINE_LEN          40        // these number of bytes
+#define WORD_LEN          24        // these number of bytes
+
+// on some Arduinos this could be MUCH larger.
+#define MAX_WORDS         10        // 3 bytes each
+#define MAX_CODE          80        // 6 bytes each
+#define MAX_STACK         20        // 6 bytes each
+
+// might have to use something like this while you are debugging things on the ardiuno
+// itself
+// #define STRING_POOL_SIZE  64       // these number of bytes
+// #define LINE_LEN          32        // these number of bytes
+// #define WORD_LEN          16        // these number of bytes
+// #define MAX_WORDS         5        // 3 bytes each
+// #define MAX_CODE          40        // 6 bytes each
+// #define MAX_STACK         10        // 6 bytes each
+
 #ifdef HAS_VARIABLES
-#define MAX_VARS          8         // 6 bytes each
+#define MAX_VARS          2         // 6 bytes each
 #endif
 
 #include <string.h>
@@ -235,7 +247,7 @@ class LogoTimeProvider {
 public:
 
   virtual unsigned long currentms() = 0;
-  virtual void delay(unsigned long ms) = 0;
+  virtual void delayms(unsigned long ms) = 0;
   virtual bool testing(short ms) = 0;
 
 };
@@ -277,9 +289,7 @@ public:
   void reset(); // reset all the code, words and stack
   void resetcode(); // reset all the code, leaves the words and restarrs
   void fail(short err);
-  void schedulenext(short delay) { 
-    _schedule.schedule(delay); 
-  }
+  void schedulenext(short delay);
   
   // dealing with the stack
   bool stackempty();
@@ -292,7 +302,6 @@ public:
   void defineintvar(char *s, short i);
 #endif
   
-
   // logo words can be self modifying code but be careful!
 #ifdef HAS_FOREVER
   void modifyreturn(short rel, short n);
@@ -380,6 +389,7 @@ private:
   void dosentences(char *buf, short len, const char *start);
 #endif
   
+  // the schdeuler for WAIT
   LogoScheduler _schedule;
   
   // parser
@@ -430,9 +440,15 @@ private:
 };
 
 #ifdef LOGO_DEBUG
+#ifdef ARDUINO
+#define DEBUG_DUMP(all)
+#define DEBUG_DUMP_MSG(msg, all)
+#define DEBUG_STEP_DUMP(count, all)
+#else
 #define DEBUG_DUMP(all)                                     logo.dump(all)
 #define DEBUG_DUMP_MSG(msg, all)                            logo.dump(msg, all)
 #define DEBUG_STEP_DUMP(count, all)                         BOOST_CHECK_EQUAL(logo.stepdump(count, all), 0)
+#endif // ARDUINO
 #else
 #define DEBUG_DUMP(all)
 #define DEBUG_DUMP_MSG(msg, all)

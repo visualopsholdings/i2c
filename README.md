@@ -293,6 +293,12 @@ void loop() {
 
 ```
 
+## Using the examples
+
+Each example is named appropriately for what it does, and to get them all to build, put this
+whole i2c folder into the "libraries" folder in your Arduion Sketch Directory. You can find
+this in Preferences, or Settings on the macintosh.
+
 ## Tiny LOGO
 
 Ok. So you've written all this code, you can send various commands to your Arduino to
@@ -329,6 +335,12 @@ To make it flash faster, or even completely write a new thing like a morse code
 tapper etc without reflashing your Arduino :-)
 
 And that code above fits happily on a Leonardo with 32k of memory (it about fills it though).
+
+After you compile an example with LOGO in it, make sure you have at least 100 bytes for local
+variables or it just won't work!!
+
+To free more space, go into the top of logo.hpp and change the sizes of various data structures
+until you free more up.
 
 Open "i2c.ino" and you can flash that example right onto your Arduino and try it out.
 

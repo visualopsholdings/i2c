@@ -32,6 +32,9 @@ void RingBuffer::checkWrite() {
 RingBuffer::RingBuffer() {
   _readp = 0;
   _writep = 0;
+  for (int i=0; i<sizeof(_buffer); i++) {
+    _buffer[i] = 0;
+  }
 }
 
 RingBuffer::~RingBuffer() {
@@ -100,7 +103,7 @@ unsigned char RingBuffer::read() {
   if (_readp >= sizeof(_buffer)) {
     _readp = 0;
   }
-
+   
   DEBUG_RETURN("%c", c);
   return c;
 }

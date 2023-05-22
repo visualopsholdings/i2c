@@ -27,6 +27,9 @@ void Cmd::outstate() const {
 
 Cmd::Cmd() {
   _len = 0;
+  for (int i=0; i<sizeof(_buffer); i++) {
+    _buffer[i] = 0;
+  }
 }
 
 Cmd::~Cmd() {
@@ -37,7 +40,7 @@ void Cmd::accept(RingBuffer *buffer) {
   DEBUG_IN(Cmd, "accept");
   
   _len = buffer->readAppend(_buffer, sizeof(_buffer), _len);
-  
+
 }
 
 int Cmd::findNext() {
