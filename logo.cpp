@@ -500,7 +500,7 @@ short Logo::step() {
   if (!_schedule.next()) {
     return 0;
   }
-
+  
   // make sure stack ops don't make it onto here.
   if (_code[_pc]._optype >= SOP_START) {
     return LG_UNHANDLED_OP_TYPE;
