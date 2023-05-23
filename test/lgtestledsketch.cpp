@@ -72,11 +72,9 @@ public:
 };
 #endif
 
-#if defined(HAS_FOREVER)
-
-BOOST_AUTO_TEST_CASE( bigSketch )
+BOOST_AUTO_TEST_CASE( ledSketch )
 {
-  cout << "=== bigSketch ===" << endl;
+  cout << "=== ledSketch ===" << endl;
   
   LogoBuiltinWord builtins[] = {
     { "ON", &ledOn },
@@ -134,40 +132,3 @@ BOOST_AUTO_TEST_CASE( bigSketch )
 #endif
   
 }
-
-#else
-
-BOOST_AUTO_TEST_CASE( smallSketch )
-{
-  cout << "=== sketch ===" << endl;
-  
-  LogoBuiltinWord builtins[] = {
-    { "ON", &ledOn },
-    { "OFF", &ledOff },
-  };
-#ifdef REAL_TIME
-  RealTimeProvider time;
-#else
-  TestTimeProvider time;
-#endif
-  Logo logo(builtins, sizeof(builtins), &time, Logo::core);
-
-  logo.compile("TO FLASH; ON WAIT 1000 OFF WAIT 2000; END;");
-  logo.compile("FLASH");
-  BOOST_CHECK_EQUAL(logo.geterr(), 0);
-  DEBUG_DUMP(false);
-  
-  gCmds.clear();
-//  DEBUG_STEP_DUMP(100, false);
-  BOOST_CHECK_EQUAL(logo.run(), 0);
-  BOOST_CHECK_EQUAL(gCmds.size(), 4);
-  BOOST_CHECK_EQUAL(gCmds[0], "LED ON");
-  BOOST_CHECK_EQUAL(gCmds[1], "WAIT 1000");
-  BOOST_CHECK_EQUAL(gCmds[2], "LED OFF");
-  BOOST_CHECK_EQUAL(gCmds[3], "WAIT 2000");
-    
-}
-
-#endif
-
-

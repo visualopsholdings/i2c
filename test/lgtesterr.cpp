@@ -153,8 +153,6 @@ BOOST_AUTO_TEST_CASE( outOfCode )
   
 }
 
-#ifdef HAS_SENTENCES
-
 void nevercalled(Logo &logo) {
   BOOST_FAIL( "was called!" );
 }
@@ -183,8 +181,6 @@ BOOST_AUTO_TEST_CASE( stackOverflow )
   BOOST_CHECK_EQUAL(logo.run(), LG_STACK_OVERFLOW);
   
 }
-
-#endif // HAS_SENTENCES
 
 #ifdef HAS_VARIABLES
 
@@ -239,5 +235,18 @@ BOOST_AUTO_TEST_CASE( notString )
 }
 
 #endif // HAS_IFELSE
+
+BOOST_AUTO_TEST_CASE( extraAfterWord )
+{
+  cout << "=== extraAfterWord ===" << endl;
+  
+  LogoBuiltinWord empty[] = {};
+  Logo logo(empty, 0, 0);
+
+  logo.compile("TO TEST1 AND SOME MORE; END;");
+  BOOST_CHECK_EQUAL(logo.geterr(), LG_EXTRA_IN_DEFINE);
+  DEBUG_DUMP(false);
+  
+}
 
 

@@ -71,6 +71,31 @@ BOOST_AUTO_TEST_CASE( builtin )
   
 }
 
+BOOST_AUTO_TEST_CASE( compound )
+{
+  cout << "=== compound ===" << endl;
+  
+  LogoBuiltinWord builtins[] = {
+    { "ON", &ledOn },
+    { "OFF", &ledOff },
+    { "WAIT", &wait, 1 }
+  };
+  Logo logo(builtins, sizeof(builtins), 0);
+
+  logo.compile("ON WAIT 100 OFF WAIT 20");
+  BOOST_CHECK_EQUAL(logo.geterr(), 0);
+  DEBUG_DUMP(false);
+
+  gCmds.clear();
+  DEBUG_STEP_DUMP(3, false);
+  BOOST_CHECK_EQUAL(logo.run(), 0);
+  BOOST_CHECK_EQUAL(gCmds[0], "LED ON");
+  BOOST_CHECK_EQUAL(gCmds[1], "WAIT 100");
+  BOOST_CHECK_EQUAL(gCmds[2], "LED OFF");
+  BOOST_CHECK_EQUAL(gCmds[3], "WAIT 20");
+  
+}
+
 BOOST_AUTO_TEST_CASE( defineSimpleWord )
 {
   cout << "=== defineSimpleWord ===" << endl;
@@ -99,31 +124,6 @@ BOOST_AUTO_TEST_CASE( defineSimpleWord )
   BOOST_CHECK_EQUAL(gCmds.size(), 2);
   BOOST_CHECK_EQUAL(gCmds[0], "LED ON");
   BOOST_CHECK_EQUAL(gCmds[1], "LED OFF");
-  
-}
-
-BOOST_AUTO_TEST_CASE( compound )
-{
-  cout << "=== compound ===" << endl;
-  
-  LogoBuiltinWord builtins[] = {
-    { "ON", &ledOn },
-    { "OFF", &ledOff },
-    { "WAIT", &wait, 1 }
-  };
-  Logo logo(builtins, sizeof(builtins), 0);
-
-  logo.compile("ON WAIT 100 OFF WAIT 20");
-  BOOST_CHECK_EQUAL(logo.geterr(), 0);
-  DEBUG_DUMP(false);
-
-  gCmds.clear();
-  DEBUG_STEP_DUMP(3, false);
-  BOOST_CHECK_EQUAL(logo.run(), 0);
-  BOOST_CHECK_EQUAL(gCmds[0], "LED ON");
-  BOOST_CHECK_EQUAL(gCmds[1], "WAIT 100");
-  BOOST_CHECK_EQUAL(gCmds[2], "LED OFF");
-  BOOST_CHECK_EQUAL(gCmds[3], "WAIT 20");
   
 }
 
@@ -230,8 +230,6 @@ BOOST_AUTO_TEST_CASE( defineEmptyWord )
   
 }
 
-#ifdef HAS_SENTENCES
-
 BOOST_AUTO_TEST_CASE( sentence )
 {
   cout << "=== sentence ===" << endl;
@@ -320,8 +318,6 @@ BOOST_AUTO_TEST_CASE( sentenceInWord )
   BOOST_CHECK_EQUAL(gCmds[0], "SARG XXX");
   
 }
-
-#endif
 
 BOOST_AUTO_TEST_CASE( arityLiteral1 )
 {
@@ -421,8 +417,6 @@ BOOST_AUTO_TEST_CASE( arityWord )
   
 }
 
-#ifdef HAS_SENTENCES
-
 BOOST_AUTO_TEST_CASE( seperateLines )
 {
   cout << "=== seperateLines ===" << endl;
@@ -492,8 +486,6 @@ BOOST_AUTO_TEST_CASE( reset )
   
 }
 
-#endif
-
 void infixfn(Logo &logo) {
 
   strstream str;
@@ -552,8 +544,41 @@ BOOST_AUTO_TEST_CASE( sizes )
   
   // half this size on an arduino
   BOOST_CHECK_EQUAL(sizeof(LogoBuiltinWord), 24);
-  BOOST_CHECK_EQUAL(sizeof(LogoWord), 3);
   BOOST_CHECK_EQUAL(sizeof(LogoInstruction), 6);
+#ifdef HAS_VARIABLES
+  BOOST_CHECK_EQUAL(sizeof(LogoWord), 4);
   BOOST_CHECK_EQUAL(sizeof(LogoVar), 6);
+#else
+  BOOST_CHECK_EQUAL(sizeof(LogoWord), 3);
+#endif
   
 }
+
+#ifdef HAS_VARIABLES
+
+BOOST_AUTO_TEST_CASE( arguments )
+{
+  cout << "=== arguments ===" << endl;
+  
+  LogoBuiltinWord empty[] = {};
+  Logo logo(empty, 0, 0, Logo::core);
+
+//   logo.compile("TO CRED1; :A * :B; END;");
+//   logo.compile("MAKE \"A 10 MAKE \"B 20 CRED1");
+ logo.compile("TO MULT :A :B; :A * :B; END;");
+ logo.compile("MULT 10 20");
+//   logo.compile("TO MULT :A; :A * 20; END;");
+//   logo.compile("MULT 10");
+  BOOST_CHECK_EQUAL(logo.geterr(), 0);
+  DEBUG_DUMP(false);
+
+  gCmds.clear();
+  DEBUG_STEP_DUMP(20, false);
+  BOOST_CHECK_EQUAL(logo.run(), 0);
+  BOOST_CHECK_EQUAL(logo.popint(), 200);
+  DEBUG_DUMP(false);
+  
+}
+
+#endif // HAS_VARIABLES
+

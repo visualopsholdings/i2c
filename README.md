@@ -351,6 +351,43 @@ One nice feature of the LOGO code is that implements WAIT the correct way withou
 
 You can read more about logo here https://en.wikipedia.org/wiki/Logo_(programming_language)
 
+### LOGO syntax
+
+#### word definitions
+
+Words need to be defined on 3 lines like this:
+
+
+```
+TO wordname; BLOCK; END
+```
+
+#### Sentences
+
+Sentences can be used and they are implemented as actual "unnamed words", like anonymous
+closures or lambas.
+
+```
+[WORD WORD WORD]
+```
+
+#### Arguments
+
+Argumemts to functions work BUT it is just a lexical trick, not scoped so recursion won't
+work.
+
+```
+TO MULT :A :B; :A * :B; END;
+MULT 10 20
+```
+
+Is functionally equivalent to:
+
+```
+TO MULT; :A * :B; END;
+MAKE \"A 10 MAKE \"B 20 MULT
+```
+
 ### LOGO words
 
 ## MAKE 

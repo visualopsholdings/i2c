@@ -74,14 +74,8 @@
 // if you don't need variables, save about 1.6k bytes
 #define HAS_VARIABLES
 
-// if you don't need repeat or forever, you can save 546 bytes
-#define HAS_FOREVER
-
 // if you don't need IFELSE and all it needs you can save around 1.2k bytes
 #define HAS_IFELSE
-
-// if you don't need [] sentences and all it needs you can save aroun 640 bytes
-#define HAS_SENTENCES
 
 // about 14.5k with all code, 9.6k bare bones with everything off.
 #define STRING_POOL_SIZE  128       // these number of bytes
@@ -89,9 +83,9 @@
 #define WORD_LEN          24        // these number of bytes
 
 // on some Arduinos this could be MUCH larger.
-#define MAX_WORDS         10        // 3 bytes each
-#define MAX_CODE          80        // 6 bytes each
-#define MAX_STACK         20        // 6 bytes each
+#define MAX_WORDS         10        // 4 bytes each
+#define MAX_CODE          90        // 6 bytes each
+#define MAX_STACK         10        // 6 bytes each
 
 // might have to use something like this while you are debugging things on the ardiuno
 // itself
@@ -121,9 +115,10 @@
 #define LG_WORD_NOT_FOUND     9
 #define LG_NO_RETURN_ADDRESS  10
 #define LG_TOO_MANY_VARS      11
-#define LG_NOT_NUM            12
+#define LG_NOT_INT            12
 #define LG_NOT_STRING         13
-#define LG_NOT_BUILTIN        14
+#define LG_NOT_CALLABLE       14
+#define LG_EXTRA_IN_DEFINE    15
 
 #define OPTYPE_NOOP           0 //
 #define OPTYPE_RETURN         1 //
@@ -132,18 +127,18 @@
 #define OPTYPE_ERR            4 // _op = error
 #define OPTYPE_WORD           5 // _op = index of word
 #define OPTYPE_STRING         6 // _op = index of string, _opand = length of string
-#define OPTYPE_NUM            7 // _op = literal number
+#define OPTYPE_INT            7 // _op = literal integer
+#define OPTYPE_DOUBLE         8 // _op = literal integer part of double, _opand is fractional
 #ifdef HAS_VARIABLES
-#define OPTYPE_REF            8 // _op = index of string with a var in it, _opand = length of string
+#define OPTYPE_REF            9 // _op = index of string with a var in it, _opand = length of string
+#define OPTYPE_POPREF         10 // _op = index of var to pop into
 #endif
 
 // only on the stack
 #define SOP_START             100
 #define SOPTYPE_ARITY         SOP_START + 1 // _op = the arity of the builtin function
 #define SOPTYPE_RETADDR       SOP_START + 2 // _op = the return address. These are just on the stack
-#ifdef HAS_FOREVER
 #define SOPTYPE_MRETADDR      SOP_START + 3 // _op = the offset to modify by
-#endif
 #ifdef HAS_IFELSE
 #define SOPTYPE_CONDRET       SOP_START + 4 // _op = the return address of if true, otherwise _op + 1
 #define SOPTYPE_SKIP          SOP_START + 5 // skip the next instruction if on the stack under a return
@@ -182,6 +177,9 @@ typedef struct {
   tStrPool  _name;
   tStrPool  _namelen;
   tJump     _jump;
+#ifdef HAS_VARIABLES
+  unsigned char _arity; // smaller than 256?
+#endif
 } LogoWord;
 
 typedef struct {
@@ -194,7 +192,7 @@ typedef struct {
 #ifdef HAS_VARIABLES
 
 typedef struct {
-  tType              _type; // just OPTYPE_STRING or OPTYPE_NUM
+  tType              _type; // just OPTYPE_STRING, OPTYPE_INT or OPTYPE_DOUBLE
   tStrPool           _name;
   tStrPool           _namelen;
   tStrPool           _valuelen;
@@ -215,16 +213,11 @@ public:
   static short ifelseArity;
 #endif
   
-#ifdef HAS_FOREVER
   static void repeat(Logo &logo);
   static short repeatArity;
   
   static void forever(Logo &logo);
   static short foreverArity;
-#endif
-
-  static void eq(Logo &logo);
-  static short eqArity;
 
 #ifdef HAS_VARIABLES
   static void make(Logo &logo);
@@ -233,6 +226,21 @@ public:
 
   static void wait(Logo &logo);
   static short waitArity;
+
+  static void subtract(Logo &logo);
+  static short subtractArity;
+
+  static void add(Logo &logo);
+  static short addArity;
+
+  static void divide(Logo &logo);
+  static short divideArity;
+
+  static void multiply(Logo &logo);
+  static short multiplyArity;
+
+  static void eq(Logo &logo);
+  static short eqArity;
 
 private:
 
@@ -286,8 +294,9 @@ public:
   short step();
   short run();
   void restart(); // run from the top, resets the stack
-  void reset(); // reset all the code, words and stack
+  void reset(); // reset all the code, words and stack and variables
   void resetcode(); // reset all the code, leaves the words and restarrs
+  void resetvars(); // reset the variables
   void fail(short err);
   void schedulenext(short delay);
   
@@ -295,21 +304,23 @@ public:
   bool stackempty();
   short popint();
   void pushint(short n);
+  double popdouble();
+  void splitdouble(double n, short *op, short *opand);
+  double joindouble(short op, short opand) const;
+  void pushdouble(double n);
   void popstring(char *s, tStrPool len);  
   void pushstring(tStrPool n, tStrPool len);  
   bool pop();
 #ifdef HAS_VARIABLES
-  void defineintvar(char *s, short i);
+  short defineintvar(const char *s, short i);
 #endif
   
   // logo words can be self modifying code but be careful!
-#ifdef HAS_FOREVER
   void modifyreturn(short rel, short n);
-#endif
 #ifdef HAS_IFELSE
-  bool codeisnum(short rel);
+  bool codeisint(short rel);
   bool codeisstring(short rel);
-  short codetonum(short rel);
+  short codetoint(short rel);
   void codetostring(short rel, tStrPool *s, tStrPool *len);
   void jumpskip(short rel);
   void jump(short rel);
@@ -333,9 +344,11 @@ private:
   
   // the state variables for defining new words
   bool _inword;
+  bool _inwordargs;
   short _defining;
   short _defininglen;
   short _jump;
+  short _wordarity;
   
   // the pool of all strings
   char _strings[STRING_POOL_SIZE];
@@ -358,9 +371,7 @@ private:
   char _wordbuf[WORD_LEN];
   char _findwordbuf[LINE_LEN];
   char _tmpbuf[LINE_LEN];
-#ifdef HAS_SENTENCES
   char _tmpbuf2[LINE_LEN];
-#endif
    
   // the code
   LogoInstruction _code[MAX_CODE];
@@ -382,18 +393,16 @@ private:
   short getvarfromref(const LogoInstruction &entry);
 #endif
   
-#ifdef HAS_SENTENCES
   // sentences
   short _sentencecount;
 
   void dosentences(char *buf, short len, const char *start);
-#endif
   
   // the schdeuler for WAIT
   LogoScheduler _schedule;
   
   // parser
-  bool dodefine(const char *word);
+  bool dodefine(const char *word, bool eol);
   void error(short error);
   void compile(const char *code, short len);
   void compilewords(const char *buf, short len, bool define);
@@ -406,7 +415,7 @@ private:
 
   // words
   void compileword(tJump *next, const char *word, short op);
-  void finishword(short word, short wordlen, short jump);
+  void finishword(short word, short wordlen, short jump, short arity);
   short findword(const char *word) const;
   
   // strings
@@ -419,7 +428,8 @@ private:
   
   // the machine
   bool push(const LogoInstruction &entry);
-  short parseint(short type, short op, short len);
+  short parseint(short type, short op, short opand);
+  double parsedouble(short type, short op, short opand);
   short doreturn();
   short dobuiltin();
   short doarity();

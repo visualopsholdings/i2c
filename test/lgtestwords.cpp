@@ -88,8 +88,6 @@ BOOST_AUTO_TEST_CASE( makeChange )
 }
 #endif
 
-#if defined(HAS_FOREVER) && defined(HAS_SENTENCES)
-
 BOOST_AUTO_TEST_CASE( forever )
 {
   cout << "=== forever ===" << endl;
@@ -148,11 +146,9 @@ BOOST_AUTO_TEST_CASE( repeat )
   
 }
 
-#endif // defined(HAS_FOREVER) && defined(HAS_SENTENCES)
-
-BOOST_AUTO_TEST_CASE( eq )
+BOOST_AUTO_TEST_CASE( eqWord )
 {
-  cout << "=== eq ===" << endl;
+  cout << "=== eqWord ===" << endl;
   
   LogoBuiltinWord empty[] = {};
   Logo logo(empty, 0, 0, Logo::core);
@@ -219,8 +215,6 @@ BOOST_AUTO_TEST_CASE( ifelseTrue )
   BOOST_CHECK(logo.stackempty());
 
 }
-
-#ifdef HAS_SENTENCES
 
 BOOST_AUTO_TEST_CASE( ifelseCond )
 {
@@ -292,8 +286,6 @@ BOOST_AUTO_TEST_CASE( ifelseLiteralFalseCond )
   BOOST_CHECK(logo.stackempty());
 
 }
-
-#endif // HAS_SENTENCES
 
 BOOST_AUTO_TEST_CASE( ifelseTrueLiteralNumBranches )
 {
@@ -491,3 +483,23 @@ BOOST_AUTO_TEST_CASE( waitWordNotReady )
   BOOST_CHECK_EQUAL(gCmds.size(), 1);
 
 }
+
+BOOST_AUTO_TEST_CASE( arithmetic )
+{
+  cout << "=== arithmetic ===" << endl;
+  
+  LogoBuiltinWord empty[] = {};
+  Logo logo(empty, 0, 0, Logo::core);
+
+  logo.compile("3 - 1 * 4 / 3");
+  BOOST_CHECK_EQUAL(logo.geterr(), 0);
+  DEBUG_DUMP(false);
+
+  DEBUG_STEP_DUMP(8, false);
+  BOOST_CHECK_EQUAL(logo.run(), 0);
+  double d = logo.popdouble();
+  BOOST_CHECK(d > 2.6);
+  BOOST_CHECK(d < 2.7);
+  
+}
+
