@@ -115,6 +115,7 @@ void setup() {
   logo.compile("TO CRED2 :R; RED2 CCLR :R; END;");
   logo.compile("TO CBLUE2 :R; BLUE2 CCLR :R; END;");
   logo.compile("TO CGREEN2 :R; GREEN2 CCLR :R; END;");
+  logo.compile("TO AMBER1; CRED1 255 CGREEN1 191 CBLUE1 0; END;");
   int err = logo.geterr();
   if (err) {
     flashErr(1, err + 2);

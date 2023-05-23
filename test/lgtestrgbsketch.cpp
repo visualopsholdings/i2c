@@ -119,7 +119,7 @@ BOOST_AUTO_TEST_CASE( rgbSketch )
   logo.compile("TO CRED2 :R; RED2 CCLR :R; END;");
   logo.compile("TO CBLUE2 :R; BLUE2 CCLR :R; END;");
   logo.compile("TO CGREEN2 :R; GREEN2 CCLR :R; END;");
-  logo.compile("TO AMBER1; CRED1 10 CGREEN1 50 CBLUE1 50; END;");
+  logo.compile("TO AMBER1; CRED1 255 CGREEN1 191 CBLUE1 0; END;");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
   DEBUG_DUMP(false);
   
@@ -133,8 +133,8 @@ BOOST_AUTO_TEST_CASE( rgbSketch )
   BOOST_CHECK_EQUAL(logo.run(), 0);
   
   BOOST_CHECK_EQUAL(gCmds.size(), 3);
-  BOOST_CHECK_EQUAL(gCmds[0], "RED1 245");
-  BOOST_CHECK_EQUAL(gCmds[1], "GREEN1 205");
-  BOOST_CHECK_EQUAL(gCmds[2], "BLUE1 205");
+  BOOST_CHECK_EQUAL(gCmds[0], "RED1 0");
+  BOOST_CHECK_EQUAL(gCmds[1], "GREEN1 64");
+  BOOST_CHECK_EQUAL(gCmds[2], "BLUE1 255");
 
 }
