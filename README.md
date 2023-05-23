@@ -394,22 +394,27 @@ MAKE \"A 10 MAKE \"B 20 MULT
 
 Make a variable. The syntax is:
 
+```
 MAKE "VARNAME VALUE
 VALUE := [number | string] 
+```
 
 ## FOREVER
 
 Repeat the next word forever. The syntax is:
 
+```
 REPEAT WORD
 WORD := [wordname | SENTENCE]
 SENTENCE := "[" LITWORD ... "]"
 LITWORD := the name of a word
+```
 
 ## REPEAT
 
 Repeat the next word a number of times. The syntax is:
 
+```
 REPEAT NUM WORD
 NUM := [number | VAR]
 VAR := :varname
@@ -418,11 +423,13 @@ LITERAL := [number | string } VAR]
 VAR := :varname
 SENTENCE := "[" LITWORD ... "]"
 LITWORD := the name of a word
+```
 
 ## IFELSE
 
 Test an expression, it true put the first word on the stack else the second. The syntax is:
 
+```
 IFELSE EXPR THEN ELSE
 EXPR := [wordname | SENTENCE | LITERAL]
 LITERAL := [number | string } VAR] 
@@ -431,25 +438,34 @@ THEN := [wordname | SENTENCE | LITERAL]
 ELSE := [wordname | SENTENCE | LITERAL]
 SENTENCE := "[" LITWORD ... "]"
 LITWORD := the name of a word
+```
 
 ## =
 
 Push a 1 on the stack if the operands are the same. The syntax is:
 
+```
 WORD = WORD
 WORD := [wordname | SENTENCE | LITERAL]
 SENTENCE := "[" LITWORD ... "]"
 LITWORD := the name of a word
+```
 
 ## WAIT (not working yet so not in current build)
 
 Wait for milliseconds before executing the next word. The syntax is:
 
+```
 WAIT NUM WORD
 NUM := [number | VAR]
 WORD := [wordname | SENTENCE]
 SENTENCE := "[" LITWORD ... "]"
 LITWORD := the name of a word
+```
+
+## Arithmetic
+
++, -, * and / all work as usual but no parenthesis and just left to right.
 
 ## Development
 
