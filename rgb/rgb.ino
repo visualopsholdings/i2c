@@ -68,7 +68,6 @@ ArduinoTimeProvider time;
 Logo logo(builtins, sizeof(builtins), &time, Logo::core);
 
 void flashErr(int mode, int n) {
-  Serial.println(n);
   // it's ok to tie up the device with delays here.
   for (int i=0; i<mode; i++) {
     digitalWrite(LED_PIN, HIGH);
@@ -102,9 +101,6 @@ void setup() {
     analogWrite(j, 255);
   }
 
- // Setup the serial port
-  Serial.begin(9600);
-
   // Setup I2C bus address
   Wire.begin(I2C_ADDRESS);
   
@@ -135,12 +131,7 @@ void receiveEvent(int howMany) {
 // Go around and around
 void loop() {
 
-  // consume the serial data into the buffer as it comes in.
-  while (Serial.available()) {
-    buffer.write(Serial.read());
-  }
- 
-  // The buffer is also filled in an interrupt as it comes in
+  // The buffer is filled in an interrupt as it comes in
 
   // accept the buffer into the command parser
   cmd.accept(&buffer);

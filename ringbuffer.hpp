@@ -24,7 +24,7 @@
 //#define RINGBUF_DEBUG
 
 #ifndef RINGBUF_SIZE_MINUS_1
-#define RINGBUF_SIZE_MINUS_1  256
+#define RINGBUF_SIZE_MINUS_1  128
 #endif
 
 class RingBuffer {

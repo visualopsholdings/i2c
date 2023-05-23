@@ -83,8 +83,8 @@
 #define WORD_LEN          24        // these number of bytes
 
 // on some Arduinos this could be MUCH larger.
-#define MAX_WORDS         10        // 4 bytes each
-#define MAX_CODE          90        // 6 bytes each
+#define MAX_WORDS         16        // 4 bytes each
+#define MAX_CODE          100        // 6 bytes each
 #define MAX_STACK         10        // 6 bytes each
 
 // might have to use something like this while you are debugging things on the ardiuno
@@ -97,7 +97,7 @@
 // #define MAX_STACK         10        // 6 bytes each
 
 #ifdef HAS_VARIABLES
-#define MAX_VARS          2         // 6 bytes each
+#define MAX_VARS              5         // 6 bytes each
 #endif
 
 #include <string.h>
