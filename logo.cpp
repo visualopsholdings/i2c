@@ -27,7 +27,7 @@ void Logo::outstate() const {
 #define DELAY_TIME  100
 #else
 #include "nodebug.hpp"
-#define DELAY_TIME  5
+#define DELAY_TIME  5 // must be non zero!
 #endif
 
 #include <stdlib.h>

@@ -78,14 +78,14 @@
 #define HAS_IFELSE
 
 // about 14.5k with all code, 9.6k bare bones with everything off.
-#define STRING_POOL_SIZE  128       // these number of bytes
-#define LINE_LEN          40        // these number of bytes
-#define WORD_LEN          24        // these number of bytes
+#define STRING_POOL_SIZE    128       // these number of bytes
+#define LINE_LEN            40        // these number of bytes
+#define WORD_LEN            24        // these number of bytes
 
 // on some Arduinos this could be MUCH larger.
-#define MAX_WORDS         16        // 4 bytes each
-#define MAX_CODE          100        // 6 bytes each
-#define MAX_STACK         10        // 6 bytes each
+#define MAX_WORDS           16        // 4 bytes each
+#define MAX_CODE            80        // 6 bytes each
+#define MAX_STACK           8        // 6 bytes each
 
 // might have to use something like this while you are debugging things on the ardiuno
 // itself
@@ -97,7 +97,7 @@
 // #define MAX_STACK         10        // 6 bytes each
 
 #ifdef HAS_VARIABLES
-#define MAX_VARS              5         // 6 bytes each
+#define MAX_VARS              4         // 6 bytes each
 #endif
 
 #include <string.h>

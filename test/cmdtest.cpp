@@ -78,7 +78,7 @@ BOOST_AUTO_TEST_CASE( multiple )
   
   BOOST_CHECK(!cmd.ready());
 
-  buffer.write("N OFF ");
+  buffer.write("N\tOFF\t");
   cmd.accept(&buffer);
 
   BOOST_CHECK(cmd.ready());
@@ -113,7 +113,7 @@ BOOST_AUTO_TEST_CASE( multipleRead )
 
   BOOST_CHECK(!cmd.ready());
 
-  buffer.write("OFF ");
+  buffer.write("OFF\t");
   cmd.accept(&buffer);
 
   BOOST_CHECK(cmd.ready());

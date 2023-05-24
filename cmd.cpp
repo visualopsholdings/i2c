@@ -48,7 +48,7 @@ int Cmd::findNext() {
   DEBUG_IN(Cmd, "findNext");
   
   for (int i=0; i<_len; i++) {
-    if (_buffer[i] == ';' || _buffer[i] == ' ' || _buffer[i] == '\n' || _buffer[i] == '\t') {
+    if (_buffer[i] == ';' || _buffer[i] == '\n' || _buffer[i] == '\t') {
       DEBUG_RETURN("%i", i);
       return i;
     }

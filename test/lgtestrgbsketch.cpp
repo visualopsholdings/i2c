@@ -30,15 +30,15 @@ using namespace boost::posix_time;
 
 vector<string> gCmds;
 
-#define PRINT_RESULT
+//#define PRINT_RESULT
 //#define REAL_TIME
 
 #include "testtimeprovider.hpp"
 
-void rgb(Logo &logo, const char *color, int num) {
+void rgb(Logo &logo, const char *color) {
 
   strstream str;
-  str << color << num << " " << logo.popint();
+  str << color << " " << logo.popint();
   gCmds.push_back(str.str());
 #ifdef PRINT_RESULT
   cout << gCmds.back() << endl;
@@ -46,28 +46,16 @@ void rgb(Logo &logo, const char *color, int num) {
 
 }
 
-void red1(Logo &logo) {
-  rgb(logo, "RED", 1);
+void red(Logo &logo) {
+  rgb(logo, "RED");
 }
 
-void green1(Logo &logo) {
-  rgb(logo, "GREEN", 1);
+void green(Logo &logo) {
+  rgb(logo, "GREEN");
 }
 
-void blue1(Logo &logo) {
-  rgb(logo, "BLUE", 1);
-}
-
-void red2(Logo &logo) {
-  rgb(logo, "RED", 2);
-}
-
-void green2(Logo &logo) {
-  rgb(logo, "GREEN", 2);
-}
-
-void blue2(Logo &logo) {
-  rgb(logo, "BLUE", 2);
+void blue(Logo &logo) {
+  rgb(logo, "BLUE");
 }
 
 #ifdef REAL_TIME
@@ -98,12 +86,9 @@ BOOST_AUTO_TEST_CASE( rgbSketch )
   cout << "=== rgbSketch ===" << endl;
   
   LogoBuiltinWord builtins[] = {
-    { "RED1", &red1, 1 },
-    { "GREEN1", &green1, 1 },
-    { "BLUE1", &blue1, 1 },
-    { "RED2", &red2, 1 },
-    { "GREEN2", &green2, 1 },
-    { "BLUE2", &blue2, 1 },
+    { "RED", &red, 1 },
+    { "GREEN", &green, 1 },
+    { "BLUE", &blue, 1 },
   };
 #ifdef REAL_TIME
   RealTimeProvider time;
@@ -112,19 +97,16 @@ BOOST_AUTO_TEST_CASE( rgbSketch )
 #endif
   Logo logo(builtins, sizeof(builtins), &time, Logo::core);
 
-  logo.compile("TO CCLR :CLR; 255 - :CLR; END;");
-  logo.compile("TO CRED1 :R; RED1 CCLR :R; END;");
-  logo.compile("TO CBLUE1 :R; BLUE1 CCLR :R; END;");
-  logo.compile("TO CGREEN1 :R; GREEN1 CCLR :R; END;");
-  logo.compile("TO CRED2 :R; RED2 CCLR :R; END;");
-  logo.compile("TO CBLUE2 :R; BLUE2 CCLR :R; END;");
-  logo.compile("TO CGREEN2 :R; GREEN2 CCLR :R; END;");
-  logo.compile("TO AMBER1; CRED1 255 CGREEN1 191 CBLUE1 0; END;");
+  logo.compile("TO C :C; 255 - :C; END;");
+  logo.compile("TO R :N; RED C :N; END;");
+  logo.compile("TO G :N; GREEN C :N; END;");
+  logo.compile("TO B :N; BLUE C :N; END;");
+  logo.compile("TO A; R 255 G 191 B 0; END;");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
   DEBUG_DUMP(false);
   
   logo.resetcode();
-  logo.compile("AMBER1");
+  logo.compile("A");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
   DEBUG_DUMP(false);
 
@@ -133,8 +115,8 @@ BOOST_AUTO_TEST_CASE( rgbSketch )
   BOOST_CHECK_EQUAL(logo.run(), 0);
   
   BOOST_CHECK_EQUAL(gCmds.size(), 3);
-  BOOST_CHECK_EQUAL(gCmds[0], "RED1 0");
-  BOOST_CHECK_EQUAL(gCmds[1], "GREEN1 64");
-  BOOST_CHECK_EQUAL(gCmds[2], "BLUE1 255");
+  BOOST_CHECK_EQUAL(gCmds[0], "RED 0");
+  BOOST_CHECK_EQUAL(gCmds[1], "GREEN 64");
+  BOOST_CHECK_EQUAL(gCmds[2], "BLUE 255");
 
 }

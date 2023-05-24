@@ -534,3 +534,10 @@ https://forum.arduino.cc/t/how-to-properly-use-wire-onreceive/891195/12
 ## Current development focus
 
 ### OUTPUT from the Arduino to the PI
+
+## Change Log
+
+24 May 2023
+- Changed Cmd so that commands can have spaces in them so that it works properly with the
+LOGO code. Tab, Newline and ";" all will mark the end of a command.
+- Lot's of LOGO work including an RGB LED example that shows off the Maths.

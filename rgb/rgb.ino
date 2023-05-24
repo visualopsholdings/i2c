@@ -20,36 +20,28 @@
 
 #define I2C_ADDRESS 8
 #define LED_PIN     13
-#define BLUE1_PIN   2
-#define RED1_PIN  3
-#define GREEN1_PIN    4
+#define BLUE_PIN    2
+#define RED_PIN     3
+#define GREEN_PIN   4
 
-#define BLUE2_PIN   9
-#define RED2_PIN  10
-#define GREEN2_PIN    11
-
-void red1(Logo &logo) {
-  analogWrite(RED1_PIN, logo.popint());
+void ledOn(Logo &logo) {
+  digitalWrite(LED_PIN, HIGH);
 }
 
-void green1(Logo &logo) {
-  analogWrite(GREEN1_PIN, logo.popint());
+void ledOff(Logo &logo) {
+  digitalWrite(LED_PIN, LOW);
 }
 
-void blue1(Logo &logo) {
-  analogWrite(BLUE1_PIN, logo.popint());
+void red(Logo &logo) {
+  analogWrite(RED_PIN, logo.popint());
 }
 
-void red2(Logo &logo) {
-  analogWrite(RED2_PIN, logo.popint());
+void green(Logo &logo) {
+  analogWrite(GREEN_PIN, logo.popint());
 }
 
-void green2(Logo &logo) {
-  analogWrite(GREEN2_PIN, logo.popint());
-}
-
-void blue2(Logo &logo) {
-  analogWrite(BLUE2_PIN, logo.popint());
+void blue(Logo &logo) {
+  analogWrite(BLUE_PIN, logo.popint());
 }
 
 RingBuffer buffer;
@@ -57,12 +49,11 @@ Cmd cmd;
 char cmdbuf[64];
 
 LogoBuiltinWord builtins[] = {
-  { "RED1", &red1, 1 },
-  { "GREEN1", &green1, 1 },
-  { "BLUE1", &blue1, 1 },
-  { "RED2", &red2, 1 },
-  { "GREEN2", &green2, 1 },
-  { "BLUE2", &blue2, 1 },
+  { "ON", &ledOn },
+  { "OFF", &ledOff },
+  { "RED", &red, 1 },
+  { "GREEN", &green, 1 },
+  { "BLUE", &blue, 1 },
 };
 ArduinoTimeProvider time;
 Logo logo(builtins, sizeof(builtins), &time, Logo::core);
@@ -92,14 +83,15 @@ void setup() {
   digitalWrite(LED_PIN, LOW);
 
   // the RGB pins
-  for (int i=0, j=BLUE1_PIN; i<3; i++, j++) {
-    pinMode(j, OUTPUT);
-    analogWrite(j, 255);
-  }
- for (int i=0, j=BLUE2_PIN; i<3; i++, j++) {
-    pinMode(j, OUTPUT);
-    analogWrite(j, 255);
-  }
+  pinMode(RED_PIN, OUTPUT);
+  analogWrite(RED_PIN, 255);
+  pinMode(BLUE_PIN, OUTPUT);
+  analogWrite(BLUE_PIN, 255);
+  pinMode(GREEN_PIN, OUTPUT);
+  analogWrite(GREEN_PIN, 255);
+ 
+  // Setup the serial port
+  Serial.begin(9600);
 
   // Setup I2C bus address
   Wire.begin(I2C_ADDRESS);
@@ -108,14 +100,10 @@ void setup() {
   Wire.onReceive(receiveEvent);
 
   // Compile a little program into the LOGO interpreter :-)
-  logo.compile("TO CCLR :CLR; 255 - :CLR; END;");
-  logo.compile("TO CRED1 :R; RED1 CCLR :R; END;");
-  logo.compile("TO CBLUE1 :R; BLUE1 CCLR :R; END;");
-  logo.compile("TO CGREEN1 :R; GREEN1 CCLR :R; END;");
-  logo.compile("TO CRED2 :R; RED2 CCLR :R; END;");
-  logo.compile("TO CBLUE2 :R; BLUE2 CCLR :R; END;");
-  logo.compile("TO CGREEN2 :R; GREEN2 CCLR :R; END;");
-  logo.compile("TO AMBER1; CRED1 255 CGREEN1 191 CBLUE1 0; END;");
+  logo.compile("TO C :C; 255 - :C; END;");
+  logo.compile("TO R :N; RED C :N; END;");
+  logo.compile("TO G :N; GREEN C :N; END;");
+  logo.compile("TO B :N; BLUE C :N; END;");
   int err = logo.geterr();
   if (err) {
     flashErr(1, err + 2);
@@ -132,6 +120,11 @@ void receiveEvent(int howMany) {
 // Go around and around
 void loop() {
 
+   // consume the serial data into the buffer as it comes in.
+  while (Serial.available()) {
+    buffer.write(Serial.read());
+  }
+ 
   // The buffer is filled in an interrupt as it comes in
 
   // accept the buffer into the command parser
@@ -142,10 +135,9 @@ void loop() {
   
     // read it in
     cmd.read(cmdbuf, sizeof(cmdbuf));
+    Serial.print("cmd ");
+    Serial.println(cmdbuf);
 
-    // reset the code but keep all our words we have defined.
-    logo.resetcode();
-    
     // reset the code but keep all our words we have defined.
     logo.resetcode();
     
