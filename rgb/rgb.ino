@@ -18,6 +18,8 @@
 
 #include <Wire.h>
 
+//#define SERIAL
+
 #define I2C_ADDRESS 8
 #define LED_PIN     13
 #define BLUE_PIN    2
@@ -59,7 +61,15 @@ ArduinoTimeProvider time;
 Logo logo(builtins, sizeof(builtins), &time, Logo::core);
 
 void flashErr(int mode, int n) {
-  // it's ok to tie up the device with delays here.
+
+#ifdef SERIAL
+  Serial.print("err ");
+  Serial.print(mode);
+  Serial.print(", ");
+  Serial.println(n);
+#endif
+
+ // it's ok to tie up the device with delays here.
   for (int i=0; i<mode; i++) {
     digitalWrite(LED_PIN, HIGH);
     delay(100);
@@ -90,6 +100,10 @@ void setup() {
   pinMode(GREEN_PIN, OUTPUT);
   analogWrite(GREEN_PIN, 255);
  
+ #ifdef SERIAL
+  Serial.begin(9600);
+ #endif
+
   // Setup I2C bus address
   Wire.begin(I2C_ADDRESS);
   
@@ -101,6 +115,7 @@ void setup() {
   logo.compile("TO R :N; RED C :N; END;");
   logo.compile("TO G :N; GREEN C :N; END;");
   logo.compile("TO B :N; BLUE C :N; END;");
+  logo.compile("TO A; R 100 G 75 B 0; END;");
   int err = logo.geterr();
   if (err) {
     flashErr(1, err + 2);
@@ -117,6 +132,13 @@ void receiveEvent(int howMany) {
 // Go around and around
 void loop() {
 
+  // consume the serial data into the buffer as it comes in.
+#ifdef SERIAL
+   while (Serial.available()) {
+    buffer.write(Serial.read());
+  }
+#endif
+
   // The buffer is filled in an interrupt as it comes in
 
   // accept the buffer into the command parser
@@ -124,10 +146,14 @@ void loop() {
   
   // when there is a valid command
   if (cmd.ready()) {
-  
+
     // read it in
     cmd.read(cmdbuf, sizeof(cmdbuf));
- 
+#ifdef SERIAL
+    Serial.print("cmd ");
+    Serial.println(cmdbuf);
+#endif
+
     // reset the code but keep all our words we have defined.
     logo.resetcode();
     

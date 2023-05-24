@@ -1110,15 +1110,22 @@ void Logo::dosentences(char *buf, short len, const char *start) {
     memmove(_tmpbuf, start + 1, end - start - 1);
     _tmpbuf[end - start - 1] = 0;
   
-    snprintf(_tmpbuf2, sizeof(_tmpbuf2), "&%d", _sentencecount);
+    snprintf(_findwordbuf, sizeof(_findwordbuf), "&%d", _sentencecount);
     _sentencecount++;
 
-    short wlen = strlen(_tmpbuf2);
-    short word = addstring(_tmpbuf2, wlen);
+    short wlen = strlen(_findwordbuf);
+    short word = addstring(_findwordbuf, wlen);
     if (word < 0) {
       error(LG_OUT_OF_STRINGS);
       return;
     }
+    
+    // how much to go?
+    short endlen = strlen(end);
+    
+    // replace sentence in the original string.
+    memmove((char *)start, _findwordbuf, wlen);
+    memmove((char *)(start + wlen), end + 1, endlen);
     
     // remember where we are before compiling.
     short jump = _nextjcode;
@@ -1129,12 +1136,6 @@ void Logo::dosentences(char *buf, short len, const char *start) {
     // and finish off the word
     finishword(word, wlen, jump, 0);
   
-    short endlen = strlen(end);
-    
-    // replace sentence in the original string.
-    memmove((char *)start, _tmpbuf2, wlen);
-    memmove((char *)(start + wlen), end + 1, endlen);
-    
     if (endlen > 1) {
       start = strstr(buf, "[");
       if (!start) {
