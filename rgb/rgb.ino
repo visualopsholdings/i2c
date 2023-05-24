@@ -90,9 +90,6 @@ void setup() {
   pinMode(GREEN_PIN, OUTPUT);
   analogWrite(GREEN_PIN, 255);
  
-  // Setup the serial port
-  Serial.begin(9600);
-
   // Setup I2C bus address
   Wire.begin(I2C_ADDRESS);
   
@@ -100,7 +97,7 @@ void setup() {
   Wire.onReceive(receiveEvent);
 
   // Compile a little program into the LOGO interpreter :-)
-  logo.compile("TO C :C; 255 - :C; END;");
+  logo.compile("TO C :C; 100 - :C / 100  * 255; END;");
   logo.compile("TO R :N; RED C :N; END;");
   logo.compile("TO G :N; GREEN C :N; END;");
   logo.compile("TO B :N; BLUE C :N; END;");
@@ -120,11 +117,6 @@ void receiveEvent(int howMany) {
 // Go around and around
 void loop() {
 
-   // consume the serial data into the buffer as it comes in.
-  while (Serial.available()) {
-    buffer.write(Serial.read());
-  }
- 
   // The buffer is filled in an interrupt as it comes in
 
   // accept the buffer into the command parser
@@ -135,9 +127,7 @@ void loop() {
   
     // read it in
     cmd.read(cmdbuf, sizeof(cmdbuf));
-    Serial.print("cmd ");
-    Serial.println(cmdbuf);
-
+ 
     // reset the code but keep all our words we have defined.
     logo.resetcode();
     

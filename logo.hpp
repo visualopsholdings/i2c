@@ -84,15 +84,15 @@
 
 // on some Arduinos this could be MUCH larger.
 #define MAX_WORDS           16        // 4 bytes each
-#define MAX_CODE            80        // 6 bytes each
-#define MAX_STACK           8        // 6 bytes each
+#define MAX_CODE            100       // 6 bytes each
+#define MAX_STACK           20        // 6 bytes each
 
 // might have to use something like this while you are debugging things on the ardiuno
 // itself
 // #define STRING_POOL_SIZE  64       // these number of bytes
 // #define LINE_LEN          32        // these number of bytes
 // #define WORD_LEN          16        // these number of bytes
-// #define MAX_WORDS         5        // 3 bytes each
+// #define MAX_WORDS         5        // 4 bytes each
 // #define MAX_CODE          40        // 6 bytes each
 // #define MAX_STACK         10        // 6 bytes each
 

@@ -97,11 +97,11 @@ BOOST_AUTO_TEST_CASE( rgbSketch )
 #endif
   Logo logo(builtins, sizeof(builtins), &time, Logo::core);
 
-  logo.compile("TO C :C; 255 - :C; END;");
+  logo.compile("TO C :C; 100 - :C / 100  * 255; END;");
   logo.compile("TO R :N; RED C :N; END;");
   logo.compile("TO G :N; GREEN C :N; END;");
   logo.compile("TO B :N; BLUE C :N; END;");
-  logo.compile("TO A; R 255 G 191 B 0; END;");
+  logo.compile("TO A; R 100 G 75 B 0; END;");
   BOOST_CHECK_EQUAL(logo.geterr(), 0);
   DEBUG_DUMP(false);
   
@@ -116,7 +116,7 @@ BOOST_AUTO_TEST_CASE( rgbSketch )
   
   BOOST_CHECK_EQUAL(gCmds.size(), 3);
   BOOST_CHECK_EQUAL(gCmds[0], "RED 0");
-  BOOST_CHECK_EQUAL(gCmds[1], "GREEN 64");
+  BOOST_CHECK_EQUAL(gCmds[1], "GREEN 63");
   BOOST_CHECK_EQUAL(gCmds[2], "BLUE 255");
 
 }
